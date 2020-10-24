@@ -1,5 +1,6 @@
 package de.onyxbits.giftedmotion;
 import java.awt.*;
+import java.awt.geom.AffineTransform;
 import java.awt.image.*;
 
 /**
@@ -17,6 +18,17 @@ public class SingleFrame  {
    * canvas.
    */
   protected Point position;
+  
+  /**
+   * An amount of rotation degrees to rotate the image by
+   * 0 = Correct direction
+   */
+  protected double rotationDegrees = 0;
+  
+  /**
+   * Scale amount (basically just scaled dimensions)
+   */
+  protected float scaleX, scaleY;
   
   /**
    * How long to show this frame in the final animation (in ms).
@@ -48,6 +60,9 @@ public class SingleFrame  {
     this.raw=raw;
     this.name=name;
     position=new Point(0,0);
+    
+    scaleX = raw.getWidth();
+    scaleY = raw.getHeight();
   }
 
   /**
@@ -57,8 +72,11 @@ public class SingleFrame  {
   public SingleFrame(SingleFrame frame) {
     this.raw=frame.raw;
     this.name=frame.name;
+    rotationDegrees = frame.rotationDegrees;
     position=new Point(frame.position);
     showtime=frame.showtime;
+    scaleX = frame.scaleX;
+    scaleY = frame.scaleY;
   }
   
   /**
@@ -80,7 +98,14 @@ public class SingleFrame  {
    * @param g the grpahics object to render to
    */
   public void paint(Graphics g) {
-    g.drawImage(raw,position.x,position.y,null);
+		  Graphics2D g2 = (Graphics2D)g;
+		  AffineTransform at = new AffineTransform();
+		  at.translate(scaleX/2, scaleY/2);
+		  at.rotate(rotationDegrees);
+		  at.translate(-scaleX/2, -scaleY/2);
+		  
+		  at.scale(scaleX/raw.getWidth(), scaleY/raw.getHeight());
+		  g2.drawImage(raw, new AffineTransformOp(at, AffineTransformOp.TYPE_NEAREST_NEIGHBOR), position.x, position.y);
   }
   
   /**
@@ -95,7 +120,8 @@ public class SingleFrame  {
     Graphics gr = ret.createGraphics();
     gr.setColor(trans);
     gr.fillRect(0,0,size.width,size.height);
-    gr.drawImage(raw,position.x,position.y,null);
+    paint(gr);
+    //gr.drawImage(raw,position.x,position.y,null);
     return ret;
   }
   

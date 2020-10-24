@@ -1,14 +1,16 @@
 package de.onyxbits.giftedmotion;
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
+
 import javax.swing.event.*;
 
 /**
  * Edit the framesequence
  */
 public class SequenceEditor extends JInternalFrame implements ActionListener,
-FrameSequenceListener, ChangeListener, ListSelectionListener {
+FrameSequenceListener, ChangeListener, ListSelectionListener, ItemListener {
 
   /**
    * Dispose codes in readable form
@@ -23,7 +25,7 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
   /**
    * Lists all frames in the sequence
    */
-  private JList frlst;
+  private JList<SingleFrame> frlst;
   
   /**
    * X Offset
@@ -36,6 +38,21 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
   private JSpinner yoff = new JSpinner(new SpinnerNumberModel(0,-1000000,1000000,1));
   
   /**
+   * Rotation degrees
+   */
+  private JSpinner rotation = new JSpinner(new SpinnerNumberModel(0,-360,360,0.01));
+  
+  /**
+   * Scale X
+   */
+  private JSpinner scaleX = new JSpinner(new SpinnerNumberModel(0,-1000000,1000000,1f));
+  
+  /**
+   * Scale Y
+   */
+  private JSpinner scaleY = new JSpinner(new SpinnerNumberModel(0,-1000000,1000000,1f));
+  
+  /**
    * Peer for SingleFrame.showtime
    */
   private JSpinner showtime = new JSpinner(new SpinnerNumberModel(100,1,1000000,10));
@@ -43,7 +60,7 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
   /**
    * Peer for SingleFrame.dispose
    */
-  private JSpinner dispose = new JSpinner(new SpinnerListModel(dcodes));
+  private JComboBox<String> dispose = new JComboBox<String>(dcodes);
   
   /**
    * Move frame in sequence
@@ -79,7 +96,7 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     super(Dict.get("sequenceeditor.sequenceeditor.title"),false,false,false,false);
     
     this.seq=seq;
-    frlst = new JList(seq.frames);
+    frlst = new JList<SingleFrame>(seq.frames);
     
     setContentPane(getContent());
     pack();
@@ -88,11 +105,15 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     later.addActionListener(this);
     duplicate.addActionListener(this);
     delete.addActionListener(this);
-    dispose.addChangeListener(this);
+    //dispose.addChangeListener(this);
+    dispose.addItemListener(this);
     frlst.addListSelectionListener(this);
     showtime.addChangeListener(this);
     xoff.addChangeListener(this);
     yoff.addChangeListener(this);
+    rotation.addChangeListener(this);
+    scaleX.addChangeListener(this);
+    scaleY.addChangeListener(this);
     
     apply.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.apply"));
     sooner.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.sooner"));
@@ -103,6 +124,9 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     showtime.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.showtime"));
     xoff.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.xoff"));
     yoff.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.yoff"));
+    scaleX.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.scaleX"));
+    scaleY.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.scaleY"));
+    rotation.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.rotation"));
     
     dataChanged(seq);
   }
@@ -122,6 +146,7 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     buttons.add(duplicate);
     buttons.add(delete);
     
+    //frlst.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
     order.add(new JScrollPane(frlst));
     order.add(buttons);
     
@@ -141,10 +166,13 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
 */
 
 
-    JLabel label0 = new JLabel(Dict.get("sequenceeditor.getcontent.showtime"));
-    JLabel label1 = new JLabel(Dict.get("sequenceeditor.getcontent.dispose"));
-    JLabel label2 = new JLabel(Dict.get("sequenceeditor.getcontent.xoff")); 
-    JLabel label3 = new JLabel(Dict.get("sequenceeditor.getcontent.yoff"));
+    JLabel showtimeLabel = new JLabel(Dict.get("sequenceeditor.getcontent.showtime"));
+    JLabel disposeLabel = new JLabel(Dict.get("sequenceeditor.getcontent.dispose"));
+    JLabel xoffLabel = new JLabel(Dict.get("sequenceeditor.getcontent.xoff")); 
+    JLabel yoffLabel = new JLabel(Dict.get("sequenceeditor.getcontent.yoff"));
+    JLabel scaleXLabel = new JLabel(Dict.get("sequenceeditor.getcontent.scaleX"));
+    JLabel scaleYLabel = new JLabel(Dict.get("sequenceeditor.getcontent.scaleY"));
+    JLabel rotationLabel = new JLabel(Dict.get("sequenceeditor.getcontent.rotation"));
     
     JPanel settings = new JPanel();
     GridBagLayout gbl = new GridBagLayout();
@@ -153,7 +181,7 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     GridBagConstraints gbc = new GridBagConstraints();
 
 
-    // Component: label0
+    // Component: showtimeLabel
     gbc.gridx = 0;
     gbc.gridy = 0;
     gbc.gridwidth = 1;
@@ -165,8 +193,8 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     gbc.ipadx = 0;
     gbc.ipady = 0;
     gbc.insets = new Insets(0,1,1,10);
-    gbl.setConstraints(label0,gbc);
-    settings.add(label0);
+    gbl.setConstraints(showtimeLabel,gbc);
+    settings.add(showtimeLabel);
 
     // Component: showtime
     gbc.gridx = 1;
@@ -183,7 +211,7 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     gbl.setConstraints(showtime,gbc);
     settings.add(showtime);
 
-    // Component: label1
+    // Component: disposeLabel
     gbc.gridx = 0;
     gbc.gridy = 1;
     gbc.gridwidth = 1;
@@ -195,8 +223,8 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     gbc.ipadx = 0;
     gbc.ipady = 0;
     gbc.insets = new Insets(0,1,1,10);
-    gbl.setConstraints(label1,gbc);
-    settings.add(label1);
+    gbl.setConstraints(disposeLabel,gbc);
+    settings.add(disposeLabel);
 
     // Component: dispose
     gbc.gridx = 1;
@@ -213,7 +241,7 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     gbl.setConstraints(dispose,gbc);
     settings.add(dispose);
 
-    // Component: label2
+    // Component: xoffLabel
     gbc.gridx = 0;
     gbc.gridy = 2;
     gbc.gridwidth = 1;
@@ -225,8 +253,8 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     gbc.ipadx = 0;
     gbc.ipady = 0;
     gbc.insets = new Insets(0,1,1,10);
-    gbl.setConstraints(label2,gbc);
-    settings.add(label2);
+    gbl.setConstraints(xoffLabel,gbc);
+    settings.add(xoffLabel);
 
     // Component: xoff
     gbc.gridx = 1;
@@ -243,7 +271,7 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     gbl.setConstraints(xoff,gbc);
     settings.add(xoff);
 
-    // Component: label3
+    // Component: yoffLabel
     gbc.gridx = 0;
     gbc.gridy = 3;
     gbc.gridwidth = 1;
@@ -255,8 +283,8 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     gbc.ipadx = 0;
     gbc.ipady = 0;
     gbc.insets = new Insets(0,1,1,10);
-    gbl.setConstraints(label3,gbc);
-    settings.add(label3);
+    gbl.setConstraints(yoffLabel,gbc);
+    settings.add(yoffLabel);
 
     // Component: yoff
     gbc.gridx = 1;
@@ -273,9 +301,99 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     gbl.setConstraints(yoff,gbc);
     settings.add(yoff);
 
-    // Component: apply
+ // Component: scaleXLabel
     gbc.gridx = 0;
     gbc.gridy = 4;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbc.weightx = 0.0;
+    gbc.weighty = 0.0;
+    gbc.anchor = GridBagConstraints.NORTHWEST;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.ipadx = 0;
+    gbc.ipady = 0;
+    gbc.insets = new Insets(0,1,1,10);
+    gbl.setConstraints(scaleXLabel,gbc);
+    settings.add(scaleXLabel);
+
+    // Component: scaleX
+    gbc.gridx = 1;
+    gbc.gridy = 4;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbc.weightx = 0.0;
+    gbc.weighty = 0.0;
+    gbc.anchor = GridBagConstraints.CENTER;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.ipadx = 0;
+    gbc.ipady = 0;
+    gbc.insets = new Insets(0,1,1,1);
+    gbl.setConstraints(scaleX,gbc);
+    settings.add(scaleX);
+    
+    // Component: scaleYLabel
+   gbc.gridx = 0;
+   gbc.gridy = 5;
+   gbc.gridwidth = 1;
+   gbc.gridheight = 1;
+   gbc.weightx = 0.0;
+   gbc.weighty = 0.0;
+   gbc.anchor = GridBagConstraints.NORTHWEST;
+   gbc.fill = GridBagConstraints.NONE;
+   gbc.ipadx = 0;
+   gbc.ipady = 0;
+   gbc.insets = new Insets(0,1,1,10);
+   gbl.setConstraints(scaleYLabel,gbc);
+   settings.add(scaleYLabel);
+
+   // Component: scaleY
+   gbc.gridx = 1;
+   gbc.gridy = 5;
+   gbc.gridwidth = 1;
+   gbc.gridheight = 1;
+   gbc.weightx = 0.0;
+   gbc.weighty = 0.0;
+   gbc.anchor = GridBagConstraints.CENTER;
+   gbc.fill = GridBagConstraints.BOTH;
+   gbc.ipadx = 0;
+   gbc.ipady = 0;
+   gbc.insets = new Insets(0,1,1,1);
+   gbl.setConstraints(scaleY,gbc);
+   settings.add(scaleY);
+    
+ // Component: rotationLabel
+    gbc.gridx = 0;
+    gbc.gridy = 6;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbc.weightx = 0.0;
+    gbc.weighty = 0.0;
+    gbc.anchor = GridBagConstraints.NORTHWEST;
+    gbc.fill = GridBagConstraints.NONE;
+    gbc.ipadx = 0;
+    gbc.ipady = 0;
+    gbc.insets = new Insets(0,1,1,10);
+    gbl.setConstraints(rotationLabel,gbc);
+    settings.add(rotationLabel);
+
+    // Component: rotation
+    gbc.gridx = 1;
+    gbc.gridy = 6;
+    gbc.gridwidth = 1;
+    gbc.gridheight = 1;
+    gbc.weightx = 0.0;
+    gbc.weighty = 0.0;
+    gbc.anchor = GridBagConstraints.CENTER;
+    gbc.fill = GridBagConstraints.BOTH;
+    gbc.ipadx = 0;
+    gbc.ipady = 0;
+    gbc.insets = new Insets(0,1,1,1);
+    gbl.setConstraints(rotation,gbc);
+    settings.add(rotation);
+
+    // Component: apply
+    gbc.gridx = 0;
+    gbc.gridy = 7;
     gbc.gridwidth = 2;
     gbc.gridheight = 1;
     gbc.weightx = 100.0;
@@ -287,9 +405,6 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     gbc.insets = new Insets(12,1,1,1);
     gbl.setConstraints(apply,gbc);
     settings.add(apply);
-
-
-
     
     JPanel content = new JPanel();
     content.setLayout(new BoxLayout(content,BoxLayout.Y_AXIS));
@@ -299,25 +414,30 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
   }
   
   public void actionPerformed(ActionEvent e) {
-    if (seq.selected==null) return;
-    Object src = e.getSource();
-    
-    if (src==dispose) {
-      seq.selected.dispose=0;
-      for (int i=0;i<dcodes.length;i++) {
-        if (dcodes[i].equals(dispose.getValue())) seq.selected.dispose=i;
-      }
-      seq.fireDataChanged();
-    }
-    
-    if (src==sooner) seq.move(seq.selected,true);
-    if (src==later) seq.move(seq.selected,false);
-    if (src==duplicate) {
-      seq.add(new SingleFrame(seq.selected), seq.getSelectedIndex());
-    }
-    if (src==delete) {
-      seq.remove(seq.selected);
-    }
+	  if (seq.selected==null) return;
+	  Object src = e.getSource();
+
+	  if (src==dispose) {
+		  seq.selected.dispose=0;
+		  for (int i=0;i<dcodes.length;i++) {
+			  if (dcodes[i].equals(dispose.getSelectedItem())) seq.selected.dispose=i;
+		  }
+		  seq.fireDataChanged();
+	  }
+
+	  if (src==sooner) seq.move(seq.selected,true);
+	  if (src==later) seq.move(seq.selected,false);
+	  if (src==duplicate) {
+		  seq.add(new SingleFrame(seq.selected), seq.getSelectedIndex());
+	  }
+	  if (src==delete) {
+		  int prevSeq = seq.getSelectedIndex();
+		  seq.remove(seq.selected);
+		  if (prevSeq <= frlst.getModel().getSize()-1)
+			  frlst.setSelectedIndex(prevSeq);
+		  else
+			  frlst.setSelectedIndex(frlst.getModel().getSize()-1);
+	  }
   }
   
   public void stateChanged(ChangeEvent e) {
@@ -334,15 +454,16 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     }
     
     if (src==dispose) {
-      int val=0;
-      for (int i=0;i<dcodes.length;i++) {
-        if (dcodes[i].equals(dispose.getValue())) val=i;
-      }
-      if (apply.isSelected()) {
-        for (int i=0;i<seq.frames.length;i++) seq.frames[i].dispose=val;
-      }
-      else seq.selected.dispose=val;
-      seq.fireDataChanged();
+    	int val=0;
+    	for (int i=0;i<dcodes.length;i++) {
+    		if (dcodes[i].equals(dispose.getSelectedItem())) val=i;
+    	}
+    	if (apply.isSelected()) {
+    		for (int i=0;i<seq.frames.length;i++) seq.frames[i].dispose=val;
+    	}
+    	else seq.selected.dispose=val;
+
+    	seq.fireDataChanged();
     }
     
     if (src==xoff || src==yoff) {
@@ -355,31 +476,69 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
       else seq.selected.position=val;
       seq.fireDataChanged();
     }
+    
+    if (src==rotation)
+    {
+    	double rot = ((Double)rotation.getModel().getValue()).doubleValue();
+    	if (apply.isSelected())
+    		for (int i = 0; i < seq.frames.length; i++)
+    			seq.frames[i].rotationDegrees = rot;
+    	else seq.selected.rotationDegrees = rot;
+    	
+    	seq.fireDataChanged();
+    }
+    
+    if (src == scaleX || src == scaleY)
+    {
+    	float sx = ((Double)scaleX.getValue()).floatValue();
+    	float sy = ((Double)scaleY.getValue()).floatValue();
+    	if (apply.isSelected())
+    		for (int i = 0; i < seq.frames.length; i++)
+    		{
+    			seq.frames[i].scaleX = sx;
+    			seq.frames[i].scaleY = sy;
+    		}
+    	else
+    	{
+    		seq.selected.scaleX = sx;
+    		seq.selected.scaleY = sy;
+    	}
+    	seq.fireDataChanged();
+    }
   }
-  
   
   public void dataChanged(FrameSequence src) {
     frlst.removeListSelectionListener(this);
-    dispose.removeChangeListener(this);
+    //dispose.removeChangeListener(this);
+    dispose.removeItemListener(this);
     showtime.removeChangeListener(this);
     xoff.removeChangeListener(this);
     yoff.removeChangeListener(this);
-    
+    rotation.removeChangeListener(this);
+    scaleX.removeChangeListener(this);
+    scaleY.removeChangeListener(this);
     
     frlst.setListData(seq.frames);
     frlst.setSelectedValue(src.selected,true);
     if (src.selected!=null) {
-      dispose.setValue(dcodes[src.selected.dispose]);
+      dispose.setSelectedItem(dcodes[src.selected.dispose]);
       showtime.setValue(new Integer(src.selected.showtime));
       xoff.setValue(new Integer(src.selected.position.x));
       yoff.setValue(new Integer(src.selected.position.y));
+      scaleX.setValue(new Double(src.selected.scaleX));
+      scaleY.setValue(new Double(src.selected.scaleY));
+      rotation.setValue(new Double(src.selected.rotationDegrees));
     }
     
     frlst.addListSelectionListener(this);
-    dispose.addChangeListener(this);
+    //dispose.addChangeListener(this);
+    dispose.addItemListener(this);
     showtime.addChangeListener(this);
     xoff.addChangeListener(this);
     yoff.addChangeListener(this);
+    rotation.addChangeListener(this);
+    scaleX.addChangeListener(this);
+    scaleY.addChangeListener(this);
   }
   
   
@@ -388,6 +547,25 @@ FrameSequenceListener, ChangeListener, ListSelectionListener {
     seq.selected=(SingleFrame)frlst.getSelectedValue();
     seq.fireDataChanged();
   }
-  
+
+@Override
+public void itemStateChanged(ItemEvent e)
+{
+	Object src = e.getSource();
+	
+	if (src==dispose) {
+		
+    	int val=0;
+    	for (int i=0;i<dcodes.length;i++) {
+    		if (dcodes[i].equals(dispose.getSelectedItem())) val=i;
+    	}
+    	if (apply.isSelected()) {
+    		for (int i=0;i<seq.frames.length;i++) seq.frames[i].dispose=val;
+    	}
+    	else seq.selected.dispose=val;
+
+    	seq.fireDataChanged();
+    }
+}
   
 }
