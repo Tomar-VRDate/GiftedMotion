@@ -24,143 +24,130 @@ public class Core
 				           MouseMotionListener,
 				           MouseListener,
 				           DropTargetListener {
-	public static final  String         GIFTED_MOTION_VERSION = "Gifted Motion 2020-24-10";
-	private static final String         VERSION               = setVersion();
+	public static final  String GIFTED_MOTION_VERSION = "Gifted Motion 2020-24-10";
+	private static final String VERSION               = setVersion();
+
 	/**
 	 * Back reference to the running program
 	 */
-	public static        Core           app;
+	public static Core app;
+
 	/**
 	 * Quit program
 	 */
-	private final        JMenuItem      quit                  = new JMenuItem(Translations.get("core.quit"),
-	                                                                          KeyEvent.VK_Q);
+	private final JMenuItem quit       = new JMenuItem(Translations.get("core.quit"),
+	                                                   KeyEvent.VK_Q);
 	/**
 	 * Load files
 	 */
-	private final        JMenuItem      load                  = new JMenuItem(Translations.get("core.load"),
-	                                                                          KeyEvent.VK_L);
+	private final JMenuItem load       = new JMenuItem(Translations.get("core.load"),
+	                                                   KeyEvent.VK_L);
 	/**
 	 * Close project
 	 */
-	private final        JMenuItem      close                 = new JMenuItem(Translations.get("core.close"),
-	                                                                          KeyEvent.VK_L);
+	private final JMenuItem close      = new JMenuItem(Translations.get("core.close"),
+	                                                   KeyEvent.VK_L);
 	/**
 	 * Export as animated GIF
 	 */
-	private final        JMenuItem      export                = new JMenuItem(Translations.get("core.export"),
-	                                                                          KeyEvent.VK_S);
+	private final JMenuItem export     = new JMenuItem(Translations.get("core.export"),
+	                                                   KeyEvent.VK_S);
 	/**
 	 * Export as deoptimized GIF
 	 */
-	private final        JMenuItem      deoptimize            = new JMenuItem(Translations.get("core.deoptimize"));
+	private final JMenuItem deoptimize = new JMenuItem(Translations.get("core.deoptimize"));
+
 	/**
 	 * Save the sequence as individual files
 	 */
-	private final        JMenuItem      extract               = new JMenuItem(Translations.get("core.extract"),
-	                                                                          KeyEvent.VK_E);
+	private final JMenuItem extract = new JMenuItem(Translations.get("core.extract"),
+	                                                KeyEvent.VK_E);
 	/**
 	 * Display license
 	 */
-	private final        JMenuItem      license               = new JMenuItem(Translations.get("core.license"));
+	private final JMenuItem license = new JMenuItem(Translations.get("core.license"));
+
 	/**
 	 * Go to homepage
 	 */
-	private final        JMenuItem      handbook              = new JMenuItem(Translations.get("core.handbook"));
+	private final JMenuItem handbook = new JMenuItem(Translations.get("core.handbook"));
+
 	/**
 	 * Go to FAQ
 	 */
-	private final        JMenuItem      faq                   = new JMenuItem(Translations.get("core.faq"));
-	/**
-	 * Play animation
-	 */
-	private final        JButton        play
-	                                                          = new JButton(IO.createIcon("Tango/22x22/actions/media"
-	                                                                                      + "-playback-start.png",
-	                                                                                      Translations.get("core.play")));
-	/**
-	 * Pause animation
-	 */
-	private final        JButton        pause
-	                                                          = new JButton(IO.createIcon("Tango/22x22/actions/media"
-	                                                                                      + "-playback-pause.png",
-	                                                                                      Translations.get("core.pause")));
+	private final JMenuItem faq = new JMenuItem(Translations.get("core.faq"));
+
 	/**
 	 * Record (same as export)
 	 */
-	private final        JButton        record
-	                                                          = new JButton(IO.createIcon("Tango/22x22/actions/document"
-	                                                                                      + "-save.png",
-	                                                                                      Translations.get("core.record")));
+	private final JButton        record         = new JButton(IO.createIcon("Tango/22x22/actions" + "/document-save.png",
+	                                                                        Translations.get("core.record")));
 	/**
 	 * Import (same as load)
 	 */
-	private final        JButton        open
-	                                                          = new JButton(IO.createIcon("Tango/22x22/actions/document"
-	                                                                                      + "-open.png",
-	                                                                                      Translations.get("core.open")));
+	private final JButton        open           = new JButton(IO.createIcon("Tango/22x22/actions" + "/document-open.png",
+	                                                                        Translations.get("core.open")));
 	/**
 	 * Close project button
 	 */
-	private final        JButton        closeButton
-	                                                          = new JButton(IO.createIcon("Tango/22x22/actions/system"
-	                                                                                      + "-log-out.png",
-	                                                                                      Translations.get("core.close")));
+	private final JButton        closeButton    = new JButton(//
+	                                                          IO.createIcon("Tango/22x22/actions/system-log-out.png",
+	                                                                        Translations.get("core.close")));
 	/**
 	 * Toggle displaying of the settings window
 	 */
-	private final        JButton        toggleSettings
-	                                                          = new JButton(IO.createIcon("Tango/22x22/categories"
-	                                                                                      + "/preferences-desktop.png",
-	                                                                                      Translations.get("core.togglesettings")));
+	private final JButton        toggleSettings = new JButton(//
+	                                                          IO.createIcon("Tango/22x22/categories/preferences-desktop"
+	                                                                        + ".png",
+	                                                                        Translations.get("core.togglesettings")));
 	/**
 	 * Drag tool
 	 */
-	private final        JToggleButton  dragButton            = new JToggleButton(IO.createIcon("Misc/Drag.png",
-	                                                                                            Translations.get("core.dragtool")));
+	private final JToggleButton  dragButton     = new JToggleButton(IO.createIcon("Misc/Drag.png",
+	                                                                              Translations.get("core.dragtool")));
 	/**
 	 * Rotate tool
 	 */
-	private final        JToggleButton  rotateButton          = new JToggleButton(IO.createIcon("Misc/Rotate.png",
-	                                                                                            Translations.get("core.rotatetool")));
+	private final JToggleButton  rotateButton   = new JToggleButton(IO.createIcon("Misc/Rotate.png",
+	                                                                              Translations.get("core.rotatetool")));
 	/**
 	 * Resize tool
 	 */
-	private final        JToggleButton  resizeButton          = new JToggleButton(IO.createIcon("Misc/Resize.png",
-	                                                                                            Translations.get("core.scaletool")));
+	private final JToggleButton  resizeButton   = new JToggleButton(IO.createIcon("Misc/Resize.png",
+	                                                                              Translations.get("core.scaletool")));
 	/**
 	 * Onionskin button
 	 */
-	private final        JToggleButton  onionButton           = new JToggleButton(IO.createIcon("Misc/onion.png",
-	                                                                                            Translations.get("core.onion")));
+	private final JToggleButton  onionButton    = new JToggleButton(IO.createIcon("Misc/onion.png",
+	                                                                              Translations.get("core.onion")));
 	/**
 	 * Settings editor
 	 */
-	private final        SettingsEditor settingsEditor        = new SettingsEditor();
+	private final SettingsEditor settingsEditor = new SettingsEditor();
 	/**
 	 * The main workspace
 	 */
-	private final        JDesktopPane   workspace             = new JDesktopPane();
+	private final JDesktopPane   workspace      = new JDesktopPane();
 	/**
 	 * For displaying status messages
 	 */
-	private final        JLabel         status                = new JLabel();
+	private final JLabel         status         = new JLabel();
 	/**
 	 * Button group for tools
 	 */
-	private final        ButtonGroup    toolGroup             = new ButtonGroup();
+	private final ButtonGroup    toolGroup      = new ButtonGroup();
 	/**
 	 * Sequence Editor
 	 */
-	private              SequenceEditor sequenceEditor;
+	private       SequenceEditor sequenceEditor;
 	/**
 	 * Frame Display
 	 */
-	private              FrameDisplay   frameDisplay;
+	private       FrameDisplay   frameDisplay;
 	/**
 	 * The framesequence being worked upon
 	 */
-	private              FrameSequence  frameSequence;
+	private       FrameSequence  frameSequence;
 
 	/**
 	 * Directory, to open filedialogs with
@@ -170,7 +157,7 @@ public class Core
 	/**
 	 * Used for doing an animation preview
 	 */
-	private Player player;
+	private FrameSequencePlayer frameSequencePlayer;
 
 	/**
 	 * Construct a new instance of the program. There may only be one object
@@ -197,8 +184,6 @@ public class Core
 		license.addActionListener(this);
 		open.addActionListener(this);
 		closeButton.addActionListener(this);
-		play.addActionListener(this);
-		pause.addActionListener(this);
 		record.addActionListener(this);
 		toggleSettings.addActionListener(this);
 		close.addActionListener(this);
@@ -218,8 +203,6 @@ public class Core
 		                                               0));
 		open.setToolTipText(((ImageIcon) open.getIcon()).getDescription());
 		closeButton.setToolTipText(((ImageIcon) closeButton.getIcon()).getDescription());
-		play.setToolTipText(((ImageIcon) play.getIcon()).getDescription());
-		pause.setToolTipText(((ImageIcon) pause.getIcon()).getDescription());
 		toggleSettings.setToolTipText(((ImageIcon) toggleSettings.getIcon()).getDescription());
 		record.setToolTipText(((ImageIcon) record.getIcon()).getDescription());
 		dragButton.setToolTipText(((ImageIcon) (dragButton.getIcon())).getDescription());
@@ -227,7 +210,6 @@ public class Core
 		rotateButton.setToolTipText(((ImageIcon) (rotateButton.getIcon())).getDescription());
 		onionButton.setToolTipText(((ImageIcon) (onionButton.getIcon())).getDescription());
 
-		pause.setEnabled(false);
 		status.setBorder(new BevelBorder(BevelBorder.LOWERED));
 
 		// Build menus
@@ -264,8 +246,14 @@ public class Core
 		tbar.add(toggleSettings);
 
 		tbar.addSeparator();
-		tbar.add(play);
-		tbar.add(pause);
+		frameSequencePlayer = new FrameSequencePlayer();
+
+		frameSequencePlayer.setPlay(this);
+		tbar.add(frameSequencePlayer.getPlay());
+
+		frameSequencePlayer.setPause(this);
+		tbar.add(frameSequencePlayer.getPause());
+
 		tbar.addSeparator();
 
 		toolGroup.add(dragButton);
@@ -375,7 +363,8 @@ public class Core
 	 **/
 
 	public void enableButtons() {
-		play.setEnabled(true);
+		frameSequencePlayer.getPlay()
+		                   .setEnabled(true);
 		record.setEnabled(true);
 		close.setEnabled(true);
 		export.setEnabled(true);
@@ -390,7 +379,8 @@ public class Core
 	}
 
 	public void disableButtons() {
-		play.setEnabled(false);
+		frameSequencePlayer.getPlay()
+		                   .setEnabled(false);
 		record.setEnabled(false);
 		close.setEnabled(false);
 		export.setEnabled(false);
@@ -447,11 +437,11 @@ public class Core
 		if (src == license) {
 			handleLicense();
 		}
-		if (src == play || src == pause) {
+		if (src == frameSequencePlayer.getPlay() || src == frameSequencePlayer.getPause()) {
 			handlePlayPause();
 		}
 		if (src == toggleSettings) {
-			handleTogglesettings();
+			handleToggleSettings();
 		}
 		if (src == close || src == closeButton) {
 			handleClose();
@@ -720,26 +710,11 @@ public class Core
 		onionButton.setSelected(false);
 		frameDisplay.getFrameCanvas()
 		            .setOnionskin(false);
-
-		try {
-			if (play.isEnabled()) {
-				player = new Player(frameSequence,
-				                    0);
-				player.start();
-				play.setEnabled(false);
-				pause.setEnabled(true);
-			} else {
-				player.interrupt();
-				player.join();
-				play.setEnabled(true);
-				pause.setEnabled(false);
-			}
-		} catch (Exception exp) {
-			exp.printStackTrace();
-		}
+		frameSequencePlayer.togglePlayOrPause(frameSequence,
+		                                      0);
 	}
 
-	public void handleTogglesettings() {
+	public void handleToggleSettings() {
 		settingsEditor.setVisible(!settingsEditor.isVisible());
 	}
 

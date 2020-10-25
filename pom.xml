@@ -1,0 +1,277 @@
+<project>
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>biz.tomar</groupId>
+	<artifactId>storage.gif</artifactId>
+	<packaging>jar</packaging>
+	<name>Gifted Motion GIF Editor</name>
+	<version>2020.10.24</version>
+	<description>GIF Editor</description>
+	<url>http://www.onyxbits.de/giftedmotion</url>
+	<licenses>
+		<license>
+			<name>The Apache Software License, Version 2.0</name>
+			<url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+		</license>
+	</licenses>
+	<developers>
+		<developer>
+			<id>onyxbits</id>
+			<name>Patrick Ahlbrecht</name>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+8</timezone>
+		</developer>
+		<developer>
+			<id>SuperDisk</id>
+			<name>Nick Faro</name>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>-4</timezone>
+		</developer>
+		<developer>
+			<id>VRDate</id>
+			<name>Tomer Bar-Shlomo</name>
+			<roles>
+				<role>architect</role>
+				<role>developer</role>
+			</roles>
+			<timezone>+2</timezone>
+		</developer>
+	</developers>
+	<scm>
+		<connection>https://github.com/VRDate/GiftedMotion</connection>
+		<developerConnection>https://github.com/VRDate</developerConnection>
+		<url>https://github.com/VRDate/GiftedMotion.git</url>
+	</scm>
+	<properties>
+		<java.version>14</java.version>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<groupId>${project.groupId}</groupId>
+		<artifactId>${project.artifactId}</artifactId>
+		<packaging>${project.packaging}</packaging>
+		<finalName>${project.artifactId}</finalName>
+		<file>target\${finalName}.jar</file>
+		<sources>target\${finalName}-sources.jar</sources>
+		<testSources>target\${finalName}-test-sources.jar</testSources>
+		<version>latest</version>
+		<!-- https://mvnrepository.com/artifact/com.googlecode.json-simple/json-simple -->
+		<json-simple.version>1.1.1</json-simple.version>
+		<!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+		<jackson-databind.version>2.9.7</jackson-databind.version>
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-compress -->
+		<commons-compress.version>1.18</commons-compress.version>
+		<!-- https://mvnrepository.com/artifact/org.tukaani/xz -->
+		<xz.version>1.8</xz.version>
+		<!-- https://mvnrepository.com/artifact/commons-net/commons-net -->
+		<commons-net.version>3.6</commons-net.version>
+		<!-- https://mvnrepository.com/artifact/javax.validation/validation-api -->
+		<validation-api.version>2.0.1.Final</validation-api.version>
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<junit.version>4.12</junit.version>
+		<commons-lang.version>2.6</commons-lang.version>
+		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
+		<maven-source-plugin.version>3.1.0</maven-source-plugin.version>
+		<flatten-maven-plugin.version>1.2.2</flatten-maven-plugin.version>
+		<maven-shade-plugin.version>3.2.1</maven-shade-plugin.version>
+		<maven-shade-plugin.mainClass>${project.groupId}.${project.artifactId}.Main</maven-shade-plugin.mainClass>
+		<maven-install-plugin.version>2.5.2</maven-install-plugin.version>
+		<!--		<maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>-->
+	</properties>
+	<dependencies>
+		<dependency>
+			<groupId>com.googlecode.json-simple</groupId>
+			<artifactId>json-simple</artifactId>
+			<version>${json-simple.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson-databind.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-compress</artifactId>
+			<version>${commons-compress.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.tukaani</groupId>
+			<artifactId>xz</artifactId>
+			<version>${xz.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-net</groupId>
+			<artifactId>commons-net</artifactId>
+			<version>${commons-net.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.validation</groupId>
+			<artifactId>validation-api</artifactId>
+			<version>${validation-api.version}</version>
+			<scope>compile</scope>
+		</dependency>
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>${junit.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons-lang.version}</version>
+			<scope>test</scope>
+		</dependency>
+	</dependencies>
+	<build>
+		<resources>
+			<resource>
+				<directory>/src/main/resources/scripts</directory>
+			</resource>
+		</resources>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${maven-compiler-plugin.version}</version>
+				<configuration>
+					<source>${java.version}</source>
+					<target>${java.version}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>${maven-source-plugin.version}</version>
+				<executions>
+					<execution>
+						<id>sources</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>jar-no-fork</goal>
+							<goal>test-jar-no-fork</goal>
+						</goals>
+						<configuration>
+							<finalName>${finalName}</finalName>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>flatten-maven-plugin</artifactId>
+				<version>${flatten-maven-plugin.version}</version>
+				<!--<configuration> -->
+				<!--<flattenMode>minimum</flattenMode> -->
+				<!--</configuration> -->
+				<executions>
+					<!-- enable flattening -->
+					<execution>
+						<id>flatten</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>flatten</goal>
+						</goals>
+					</execution>
+					<!-- ensure proper cleanup -->
+					<execution>
+						<id>flatten.clean</id>
+						<phase>clean</phase>
+						<goals>
+							<goal>clean</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-shade-plugin</artifactId>
+				<version>${maven-shade-plugin.version}</version>
+				<executions>
+					<execution>
+						<phase>package</phase>
+						<goals>
+							<goal>shade</goal>
+						</goals>
+						<configuration>
+							<finalName>${finalName}</finalName>
+							<transformers>
+								<transformer
+										implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
+									<mainClass>${maven-shade-plugin.mainClass}</mainClass>
+								</transformer>
+							</transformers>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<!--			<plugin>-->
+			<!--				<artifactId>maven-resources-plugin</artifactId>-->
+			<!--				<version>${maven-resources-plugin.version}</version>-->
+			<!--				<executions>-->
+			<!--					<execution>-->
+			<!--						<id>copy-resources</id>-->
+			<!--						&lt;!&ndash; here the phase you need &ndash;&gt;-->
+			<!--						<phase>validate</phase>-->
+			<!--						<goals>-->
+			<!--							<goal>copy-resources</goal>-->
+			<!--						</goals>-->
+			<!--						<configuration>-->
+			<!--							<outputDirectory>${basedir}/target</outputDirectory>-->
+			<!--							<resources>-->
+			<!--								<resource>-->
+			<!--									<filtering>true</filtering>-->
+			<!--								</resource>-->
+			<!--							</resources>-->
+			<!--						</configuration>-->
+			<!--					</execution>-->
+			<!--				</executions>-->
+			<!--			</plugin>-->
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-install-plugin</artifactId>
+				<version>${maven-install-plugin.version}</version>
+				<configuration>
+					<generatePom>false</generatePom>
+					<createChecksum>true</createChecksum>
+				</configuration>
+				<executions>
+					<execution>
+						<id>latest</id>
+						<phase>install</phase>
+						<goals>
+							<goal>install-file</goal>
+						</goals>
+					</execution>
+					<!-- <execution> <id>latest-win</id> <phase>install</phase> <goals>
+                        <goal>install-file</goal> </goals> <configuration> <localRepositoryPath>C:/Program
+                        Files (x86)/</localRepositoryPath> </configuration> </execution> -->
+					<!-- <execution> <id>latest-linux</id> <phase>install</phase> <goals>
+                        <goal>install-file</goal> </goals> <configuration> <localRepositoryPath>/opt/xdman</localRepositoryPath>
+                        </configuration> </execution> -->
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<pluginRepositories>
+		<pluginRepository>
+			<releases>
+				<updatePolicy>daily</updatePolicy>
+			</releases>
+			<snapshots>
+				<enabled>true</enabled>
+			</snapshots>
+			<id>central</id>
+			<name>Central Repository</name>
+			<url>https://repo.maven.apache.org/maven2</url>
+		</pluginRepository>
+	</pluginRepositories>
+</project>

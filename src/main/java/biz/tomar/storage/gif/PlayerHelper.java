@@ -1,6 +1,6 @@
 package biz.tomar.storage.gif;
 
-class PlayerHelper
+public class PlayerHelper
 				implements Runnable {
 
 	private final FrameSequence frameSequence;
