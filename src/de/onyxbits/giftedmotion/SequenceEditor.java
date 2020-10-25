@@ -1,571 +1,704 @@
 package de.onyxbits.giftedmotion;
+
 import javax.swing.*;
-
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import java.awt.*;
-import java.awt.event.*;
-
-import javax.swing.event.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
+import java.util.Objects;
 
 /**
- * Edit the framesequence
+ * Edit the frame sequence
  */
-public class SequenceEditor extends JInternalFrame implements ActionListener,
-FrameSequenceListener, ChangeListener, ListSelectionListener, ItemListener {
+public class SequenceEditor
+				extends JInternalFrame
+				implements ActionListener,
+				           FrameSequenceListener,
+				           ChangeListener,
+				           ListSelectionListener,
+				           ItemListener {
 
-  /**
-   * Dispose codes in readable form
-   */
-  private String[] dcodes = {
-    Dict.get("sequenceeditor.dcodes.0"),
-    Dict.get("sequenceeditor.dcodes.1"),
-    Dict.get("sequenceeditor.dcodes.2"),
-    Dict.get("sequenceeditor.dcodes.3")
-  };
-  
-  /**
-   * Lists all frames in the sequence
-   */
-  private JList<SingleFrame> frlst;
-  
-  /**
-   * X Offset
-   */
-  private JSpinner xoff = new JSpinner(new SpinnerNumberModel(0,-1000000,1000000,1));
-  
-  /**
-   * Y Offset
-   */
-  private JSpinner yoff = new JSpinner(new SpinnerNumberModel(0,-1000000,1000000,1));
-  
-  /**
-   * Rotation degrees
-   */
-  private JSpinner rotation = new JSpinner(new SpinnerNumberModel(0,-360,360,0.01));
-  
-  /**
-   * Scale X
-   */
-  private JSpinner scaleX = new JSpinner(new SpinnerNumberModel(0,-1000000,1000000,1f));
-  
-  /**
-   * Scale Y
-   */
-  private JSpinner scaleY = new JSpinner(new SpinnerNumberModel(0,-1000000,1000000,1f));
-  
-  /**
-   * Peer for SingleFrame.showtime
-   */
-  private JSpinner showtime = new JSpinner(new SpinnerNumberModel(100,1,1000000,10));
-  
-  /**
-   * Peer for SingleFrame.dispose
-   */
-  private JComboBox<String> dispose = new JComboBox<String>(dcodes);
-  
-  /**
-   * Move frame in sequence
-   */
-  private JButton sooner = new JButton(IO.createIcon("Tango/22x22/actions/go-up.png",Dict.get("sequenceeditor.sooner")));
-  
-  /**
-   * Mode frame in sequence
-   */
-  private JButton later = new JButton(IO.createIcon("Tango/22x22/actions/go-down.png",Dict.get("sequenceeditor.later")));
+	/**
+	 * Dispose codes in readable form
+	 */
+	private final String[]           dcodes    = {Translations.get("sequenceeditor.dcodes.0"),
+	                                              Translations.get("sequenceeditor.dcodes.1"),
+	                                              Translations.get("sequenceeditor.dcodes.2"),
+	                                              Translations.get("sequenceeditor.dcodes.3")};
+	/**
+	 * X Offset
+	 */
+	private final JSpinner           xoff      = new JSpinner(new SpinnerNumberModel(0,
+	                                                                                 -1000000,
+	                                                                                 1000000,
+	                                                                                 1));
+	/**
+	 * Y Offset
+	 */
+	private final JSpinner           yoff      = new JSpinner(new SpinnerNumberModel(0,
+	                                                                                 -1000000,
+	                                                                                 1000000,
+	                                                                                 1));
+	/**
+	 * Rotation degrees
+	 */
+	private final JSpinner           rotation  = new JSpinner(new SpinnerNumberModel(0,
+	                                                                                 -360,
+	                                                                                 360,
+	                                                                                 0.01));
+	/**
+	 * Scale X
+	 */
+	private final JSpinner           scaleX    = new JSpinner(new SpinnerNumberModel(0,
+	                                                                                 -1000000,
+	                                                                                 1000000,
+	                                                                                 1f));
+	/**
+	 * Scale Y
+	 */
+	private final JSpinner           scaleY    = new JSpinner(new SpinnerNumberModel(0,
+	                                                                                 -1000000,
+	                                                                                 1000000,
+	                                                                                 1f));
+	/**
+	 * Peer for SingleFrame.showtime
+	 */
+	private final JSpinner           showtime  = new JSpinner(new SpinnerNumberModel(100,
+	                                                                                 1,
+	                                                                                 1000000,
+	                                                                                 10));
+	/**
+	 * Peer for SingleFrame.dispose
+	 */
+	private final JComboBox<String>  dispose   = new JComboBox<>(dcodes);
+	/**
+	 * Move frame in sequence
+	 */
+	private final JButton            sooner    = new JButton(IO.createIcon("Tango/22x22/actions/go-up.png",
+	                                                                       Translations.get("sequenceeditor.sooner")));
+	/**
+	 * Mode frame in sequence
+	 */
+	private final JButton            later     = new JButton(IO.createIcon("Tango/22x22/actions/go-down.png",
+	                                                                       Translations.get("sequenceeditor.later")));
+	/**
+	 * Duplicate current frame
+	 */
+	private final JButton            duplicate = new JButton(IO.createIcon("Tango/22x22/actions/edit-copy.png",
+	                                                                       Translations.get("sequenceeditor.copy")));
+	/**
+	 * Trash current frame
+	 */
+	private final JButton            delete    = new JButton(IO.createIcon("Tango/22x22/actions/edit-delete.png",
+	                                                                       Translations.get("sequenceeditor.delete")));
+	/**
+	 * The checkbox to apply the changes to all frames
+	 */
+	private final JCheckBox          apply     = new JCheckBox(Translations.get("sequenceeditor.apply"),
+	                                                           false);
+	/**
+	 * The framesequence, displayed
+	 */
+	private final FrameSequence      frameSequence;
+	/**
+	 * Lists all frames in the sequence
+	 */
+	private final JList<SingleFrame> singleFrameJList;
 
-  /**
-   * Duplicate current frame
-   */
-  private JButton duplicate = new JButton(IO.createIcon("Tango/22x22/actions/edit-copy.png",Dict.get("sequenceeditor.copy")));
-  
-  /**
-   * Trash current frame
-   */
-  private JButton delete = new JButton(IO.createIcon("Tango/22x22/actions/edit-delete.png",Dict.get("sequenceeditor.delete")));
-  
-  /**
-   * The checkbox to apply the changes to all frames
-   */
-  private JCheckBox apply = new JCheckBox(Dict.get("sequenceeditor.apply"),false);
-  
-  /**
-   * The framesequence, displayed
-   */
-  private FrameSequence seq;
-  
-  public SequenceEditor(FrameSequence seq) {
-    super(Dict.get("sequenceeditor.sequenceeditor.title"),false,false,false,false);
-    
-    this.seq=seq;
-    frlst = new JList<SingleFrame>(seq.frames);
-    
-    setContentPane(getContent());
-    pack();
-    
-    sooner.addActionListener(this);
-    later.addActionListener(this);
-    duplicate.addActionListener(this);
-    delete.addActionListener(this);
-    //dispose.addChangeListener(this);
-    dispose.addItemListener(this);
-    frlst.addListSelectionListener(this);
-    showtime.addChangeListener(this);
-    xoff.addChangeListener(this);
-    yoff.addChangeListener(this);
-    rotation.addChangeListener(this);
-    scaleX.addChangeListener(this);
-    scaleY.addChangeListener(this);
-    
-    apply.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.apply"));
-    sooner.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.sooner"));
-    later.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.later"));
-    duplicate.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.duplicate"));
-    delete.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.delete"));
-    dispose.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.dispose"));
-    showtime.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.showtime"));
-    xoff.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.xoff"));
-    yoff.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.yoff"));
-    scaleX.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.scaleX"));
-    scaleY.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.scaleY"));
-    rotation.setToolTipText(Dict.get("sequenceeditor.sequenceeditor.rotation"));
-    
-    dataChanged(seq);
-  }
+	public SequenceEditor(FrameSequence frameSequence) {
+		super(Translations.get("sequenceeditor.sequenceeditor.title"),
+		      false,
+		      false,
+		      false,
+		      false);
 
-  /**
-   * Build the contentpane
-   */
-  private JPanel getContent() {
-    
-    JPanel order =new JPanel();
-    order.setLayout(new BoxLayout(order,BoxLayout.Y_AXIS));
-    order.setBorder(BorderFactory.createTitledBorder(Dict.get("sequenceeditor.getcontent.order")));
-    JPanel buttons = new JPanel();
-    buttons.add(sooner);
-    buttons.add(later);
-    buttons.add(Box.createHorizontalGlue());
-    buttons.add(duplicate);
-    buttons.add(delete);
-    
-    //frlst.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
-    order.add(new JScrollPane(frlst));
-    order.add(buttons);
+		this.frameSequence = frameSequence;
+		singleFrameJList = new JList<>(frameSequence.getSingleFrames());
+
+		setContentPane(getContent());
+		pack();
+
+		sooner.addActionListener(this);
+		later.addActionListener(this);
+		duplicate.addActionListener(this);
+		delete.addActionListener(this);
+		//dispose.addChangeListener(this);
+		dispose.addItemListener(this);
+		singleFrameJList.addListSelectionListener(this);
+		showtime.addChangeListener(this);
+		xoff.addChangeListener(this);
+		yoff.addChangeListener(this);
+		rotation.addChangeListener(this);
+		scaleX.addChangeListener(this);
+		scaleY.addChangeListener(this);
+
+		apply.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.apply"));
+		sooner.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.sooner"));
+		later.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.later"));
+		duplicate.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.duplicate"));
+		delete.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.delete"));
+		dispose.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.dispose"));
+		showtime.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.showtime"));
+		xoff.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.xoff"));
+		yoff.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.yoff"));
+		scaleX.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.scaleX"));
+		scaleY.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.scaleY"));
+		rotation.setToolTipText(Translations.get("sequenceeditor.sequenceeditor.rotation"));
+
+		dataChanged(frameSequence);
+	}
+
+	/**
+	 * Build the contentpane
+	 */
+	private JPanel getContent() {
+
+		JPanel order = new JPanel();
+		order.setLayout(new BoxLayout(order,
+		                              BoxLayout.Y_AXIS));
+		order.setBorder(BorderFactory.createTitledBorder(Translations.get("sequenceeditor.getcontent.order")));
+		JPanel buttons = new JPanel();
+		buttons.add(sooner);
+		buttons.add(later);
+		buttons.add(Box.createHorizontalGlue());
+		buttons.add(duplicate);
+		buttons.add(delete);
+
+		//frlst.setSelectionMode(ListSelectionModel.MULTIPLE_INTERVAL_SELECTION);
+		order.add(new JScrollPane(singleFrameJList));
+		order.add(buttons);
     
 /*
     JPanel settings = new JPanel();
-    settings.setBorder(BorderFactory.createTitledBorder(Dict.get("sequenceeditor.getcontent.settings")));
+    settings.setBorder(BorderFactory.createTitledBorder(Translations.get("sequenceeditor.getcontent.settings")));
     settings.setLayout(new GridLayout(5,0));
-    settings.add(new JLabel(Dict.get("sequenceeditor.getcontent.showtime")));
+    settings.add(new JLabel(Translations.get("sequenceeditor.getcontent.showtime")));
     settings.add(showtime);
-    settings.add(new JLabel(Dict.get("sequenceeditor.getcontent.dispose")));
+    settings.add(new JLabel(Translations.get("sequenceeditor.getcontent.dispose")));
     settings.add(dispose);
-    settings.add(new JLabel(Dict.get("sequenceeditor.getcontent.xoff")));
+    settings.add(new JLabel(Translations.get("sequenceeditor.getcontent.xoff")));
     settings.add(xoff);
-    settings.add(new JLabel(Dict.get("sequenceeditor.getcontent.yoff")));
+    settings.add(new JLabel(Translations.get("sequenceeditor.getcontent.yoff")));
     settings.add(yoff);
     settings.add(apply);
 */
 
 
-    JLabel showtimeLabel = new JLabel(Dict.get("sequenceeditor.getcontent.showtime"));
-    JLabel disposeLabel = new JLabel(Dict.get("sequenceeditor.getcontent.dispose"));
-    JLabel xoffLabel = new JLabel(Dict.get("sequenceeditor.getcontent.xoff")); 
-    JLabel yoffLabel = new JLabel(Dict.get("sequenceeditor.getcontent.yoff"));
-    JLabel scaleXLabel = new JLabel(Dict.get("sequenceeditor.getcontent.scaleX"));
-    JLabel scaleYLabel = new JLabel(Dict.get("sequenceeditor.getcontent.scaleY"));
-    JLabel rotationLabel = new JLabel(Dict.get("sequenceeditor.getcontent.rotation"));
-    
-    JPanel settings = new JPanel();
-    GridBagLayout gbl = new GridBagLayout();
-    settings.setLayout(gbl);
-    settings.setBorder(BorderFactory.createTitledBorder(Dict.get("sequenceeditor.getcontent.settings")));
-    GridBagConstraints gbc = new GridBagConstraints();
+		JLabel showtimeLabel = new JLabel(Translations.get("sequenceeditor.getcontent.showtime"));
+		JLabel disposeLabel  = new JLabel(Translations.get("sequenceeditor.getcontent.dispose"));
+		JLabel xoffLabel     = new JLabel(Translations.get("sequenceeditor.getcontent.xoff"));
+		JLabel yoffLabel     = new JLabel(Translations.get("sequenceeditor.getcontent.yoff"));
+		JLabel scaleXLabel   = new JLabel(Translations.get("sequenceeditor.getcontent.scaleX"));
+		JLabel scaleYLabel   = new JLabel(Translations.get("sequenceeditor.getcontent.scaleY"));
+		JLabel rotationLabel = new JLabel(Translations.get("sequenceeditor.getcontent.rotation"));
+
+		JPanel        settings      = new JPanel();
+		GridBagLayout gridBagLayout = new GridBagLayout();
+		settings.setLayout(gridBagLayout);
+		settings.setBorder(BorderFactory.createTitledBorder(Translations.get("sequenceeditor.getcontent.settings")));
+		GridBagConstraints gridBagConstraints = new GridBagConstraints();
 
 
-    // Component: showtimeLabel
-    gbc.gridx = 0;
-    gbc.gridy = 0;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,10);
-    gbl.setConstraints(showtimeLabel,gbc);
-    settings.add(showtimeLabel);
+		// Component: showtimeLabel
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.CENTER;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       10);
+		gridBagLayout.setConstraints(showtimeLabel,
+		                             gridBagConstraints);
+		settings.add(showtimeLabel);
 
-    // Component: showtime
-    gbc.gridx = 1;
-    gbc.gridy = 0;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,1);
-    gbl.setConstraints(showtime,gbc);
-    settings.add(showtime);
+		// Component: showtime
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 0;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.CENTER;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       1);
+		gridBagLayout.setConstraints(showtime,
+		                             gridBagConstraints);
+		settings.add(showtime);
 
-    // Component: disposeLabel
-    gbc.gridx = 0;
-    gbc.gridy = 1;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.NORTHWEST;
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,10);
-    gbl.setConstraints(disposeLabel,gbc);
-    settings.add(disposeLabel);
+		// Component: disposeLabel
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 1;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       10);
+		gridBagLayout.setConstraints(disposeLabel,
+		                             gridBagConstraints);
+		settings.add(disposeLabel);
 
-    // Component: dispose
-    gbc.gridx = 1;
-    gbc.gridy = 1;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,1);
-    gbl.setConstraints(dispose,gbc);
-    settings.add(dispose);
+		// Component: dispose
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 1;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.CENTER;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       1);
+		gridBagLayout.setConstraints(dispose,
+		                             gridBagConstraints);
+		settings.add(dispose);
 
-    // Component: xoffLabel
-    gbc.gridx = 0;
-    gbc.gridy = 2;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.NORTHWEST;
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,10);
-    gbl.setConstraints(xoffLabel,gbc);
-    settings.add(xoffLabel);
+		// Component: xoffLabel
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 2;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       10);
+		gridBagLayout.setConstraints(xoffLabel,
+		                             gridBagConstraints);
+		settings.add(xoffLabel);
 
-    // Component: xoff
-    gbc.gridx = 1;
-    gbc.gridy = 2;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,1);
-    gbl.setConstraints(xoff,gbc);
-    settings.add(xoff);
+		// Component: xoff
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 2;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.CENTER;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       1);
+		gridBagLayout.setConstraints(xoff,
+		                             gridBagConstraints);
+		settings.add(xoff);
 
-    // Component: yoffLabel
-    gbc.gridx = 0;
-    gbc.gridy = 3;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.NORTHWEST;
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,10);
-    gbl.setConstraints(yoffLabel,gbc);
-    settings.add(yoffLabel);
+		// Component: yoffLabel
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 3;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       10);
+		gridBagLayout.setConstraints(yoffLabel,
+		                             gridBagConstraints);
+		settings.add(yoffLabel);
 
-    // Component: yoff
-    gbc.gridx = 1;
-    gbc.gridy = 3;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,1);
-    gbl.setConstraints(yoff,gbc);
-    settings.add(yoff);
+		// Component: yoff
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 3;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.CENTER;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       1);
+		gridBagLayout.setConstraints(yoff,
+		                             gridBagConstraints);
+		settings.add(yoff);
 
- // Component: scaleXLabel
-    gbc.gridx = 0;
-    gbc.gridy = 4;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.NORTHWEST;
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,10);
-    gbl.setConstraints(scaleXLabel,gbc);
-    settings.add(scaleXLabel);
+		// Component: scaleXLabel
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 4;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       10);
+		gridBagLayout.setConstraints(scaleXLabel,
+		                             gridBagConstraints);
+		settings.add(scaleXLabel);
 
-    // Component: scaleX
-    gbc.gridx = 1;
-    gbc.gridy = 4;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,1);
-    gbl.setConstraints(scaleX,gbc);
-    settings.add(scaleX);
-    
-    // Component: scaleYLabel
-   gbc.gridx = 0;
-   gbc.gridy = 5;
-   gbc.gridwidth = 1;
-   gbc.gridheight = 1;
-   gbc.weightx = 0.0;
-   gbc.weighty = 0.0;
-   gbc.anchor = GridBagConstraints.NORTHWEST;
-   gbc.fill = GridBagConstraints.NONE;
-   gbc.ipadx = 0;
-   gbc.ipady = 0;
-   gbc.insets = new Insets(0,1,1,10);
-   gbl.setConstraints(scaleYLabel,gbc);
-   settings.add(scaleYLabel);
+		// Component: scaleX
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 4;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.CENTER;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       1);
+		gridBagLayout.setConstraints(scaleX,
+		                             gridBagConstraints);
+		settings.add(scaleX);
 
-   // Component: scaleY
-   gbc.gridx = 1;
-   gbc.gridy = 5;
-   gbc.gridwidth = 1;
-   gbc.gridheight = 1;
-   gbc.weightx = 0.0;
-   gbc.weighty = 0.0;
-   gbc.anchor = GridBagConstraints.CENTER;
-   gbc.fill = GridBagConstraints.BOTH;
-   gbc.ipadx = 0;
-   gbc.ipady = 0;
-   gbc.insets = new Insets(0,1,1,1);
-   gbl.setConstraints(scaleY,gbc);
-   settings.add(scaleY);
-    
- // Component: rotationLabel
-    gbc.gridx = 0;
-    gbc.gridy = 6;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.NORTHWEST;
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,10);
-    gbl.setConstraints(rotationLabel,gbc);
-    settings.add(rotationLabel);
+		// Component: scaleYLabel
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 5;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       10);
+		gridBagLayout.setConstraints(scaleYLabel,
+		                             gridBagConstraints);
+		settings.add(scaleYLabel);
 
-    // Component: rotation
-    gbc.gridx = 1;
-    gbc.gridy = 6;
-    gbc.gridwidth = 1;
-    gbc.gridheight = 1;
-    gbc.weightx = 0.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.BOTH;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(0,1,1,1);
-    gbl.setConstraints(rotation,gbc);
-    settings.add(rotation);
+		// Component: scaleY
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 5;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.CENTER;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       1);
+		gridBagLayout.setConstraints(scaleY,
+		                             gridBagConstraints);
+		settings.add(scaleY);
 
-    // Component: apply
-    gbc.gridx = 0;
-    gbc.gridy = 7;
-    gbc.gridwidth = 2;
-    gbc.gridheight = 1;
-    gbc.weightx = 100.0;
-    gbc.weighty = 0.0;
-    gbc.anchor = GridBagConstraints.CENTER;
-    gbc.fill = GridBagConstraints.NONE;
-    gbc.ipadx = 0;
-    gbc.ipady = 0;
-    gbc.insets = new Insets(12,1,1,1);
-    gbl.setConstraints(apply,gbc);
-    settings.add(apply);
-    
-    JPanel content = new JPanel();
-    content.setLayout(new BoxLayout(content,BoxLayout.Y_AXIS));
-    content.add(order);
-    content.add(settings);
-    return content;
-  }
-  
-  public void actionPerformed(ActionEvent e) {
-	  if (seq.selected==null) return;
-	  Object src = e.getSource();
+		// Component: rotationLabel
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 6;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.NORTHWEST;
+		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       10);
+		gridBagLayout.setConstraints(rotationLabel,
+		                             gridBagConstraints);
+		settings.add(rotationLabel);
 
-	  if (src==dispose) {
-		  seq.selected.dispose=0;
-		  for (int i=0;i<dcodes.length;i++) {
-			  if (dcodes[i].equals(dispose.getSelectedItem())) seq.selected.dispose=i;
-		  }
-		  seq.fireDataChanged();
-	  }
+		// Component: rotation
+		gridBagConstraints.gridx = 1;
+		gridBagConstraints.gridy = 6;
+		gridBagConstraints.gridwidth = 1;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 0.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.CENTER;
+		gridBagConstraints.fill = GridBagConstraints.BOTH;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(0,
+		                                       1,
+		                                       1,
+		                                       1);
+		gridBagLayout.setConstraints(rotation,
+		                             gridBagConstraints);
+		settings.add(rotation);
 
-	  if (src==sooner) seq.move(seq.selected,true);
-	  if (src==later) seq.move(seq.selected,false);
-	  if (src==duplicate) {
-		  seq.add(new SingleFrame(seq.selected), seq.getSelectedIndex());
-	  }
-	  if (src==delete) {
-		  int prevSeq = seq.getSelectedIndex();
-		  seq.remove(seq.selected);
-		  if (prevSeq <= frlst.getModel().getSize()-1)
-			  frlst.setSelectedIndex(prevSeq);
-		  else
-			  frlst.setSelectedIndex(frlst.getModel().getSize()-1);
-	  }
-  }
-  
-  public void stateChanged(ChangeEvent e) {
-    if (seq.selected==null) return;
-    
-    Object src = e.getSource();
-    if (src==showtime) {
-      int val=((Integer)showtime.getValue()).intValue();
-      if (apply.isSelected()) {
-        for (int i=0;i<seq.frames.length;i++) seq.frames[i].showtime=val;
-      }
-      else seq.selected.showtime=((Integer)showtime.getValue()).intValue();
-      seq.fireDataChanged();
-    }
-    
-    if (src==dispose) {
-    	int val=0;
-    	for (int i=0;i<dcodes.length;i++) {
-    		if (dcodes[i].equals(dispose.getSelectedItem())) val=i;
-    	}
-    	if (apply.isSelected()) {
-    		for (int i=0;i<seq.frames.length;i++) seq.frames[i].dispose=val;
-    	}
-    	else seq.selected.dispose=val;
+		// Component: apply
+		gridBagConstraints.gridx = 0;
+		gridBagConstraints.gridy = 7;
+		gridBagConstraints.gridwidth = 2;
+		gridBagConstraints.gridheight = 1;
+		gridBagConstraints.weightx = 100.0;
+		gridBagConstraints.weighty = 0.0;
+		gridBagConstraints.anchor = GridBagConstraints.CENTER;
+		gridBagConstraints.fill = GridBagConstraints.NONE;
+		gridBagConstraints.ipadx = 0;
+		gridBagConstraints.ipady = 0;
+		gridBagConstraints.insets = new Insets(12,
+		                                       1,
+		                                       1,
+		                                       1);
+		gridBagLayout.setConstraints(apply,
+		                             gridBagConstraints);
+		settings.add(apply);
 
-    	seq.fireDataChanged();
-    }
-    
-    if (src==xoff || src==yoff) {
-      int x=((Integer)xoff.getValue()).intValue();
-      int y=((Integer)yoff.getValue()).intValue();
-      Point val = new Point(x,y);
-      if (apply.isSelected()) {
-        for (int i=0;i<seq.frames.length;i++) seq.frames[i].position=val;
-      }
-      else seq.selected.position=val;
-      seq.fireDataChanged();
-    }
-    
-    if (src==rotation)
-    {
-    	double rot = ((Double)rotation.getModel().getValue()).doubleValue();
-    	if (apply.isSelected())
-    		for (int i = 0; i < seq.frames.length; i++)
-    			seq.frames[i].rotationDegrees = rot;
-    	else seq.selected.rotationDegrees = rot;
-    	
-    	seq.fireDataChanged();
-    }
-    
-    if (src == scaleX || src == scaleY)
-    {
-    	float sx = ((Double)scaleX.getValue()).floatValue();
-    	float sy = ((Double)scaleY.getValue()).floatValue();
-    	if (apply.isSelected())
-    		for (int i = 0; i < seq.frames.length; i++)
-    		{
-    			seq.frames[i].scaleX = sx;
-    			seq.frames[i].scaleY = sy;
-    		}
-    	else
-    	{
-    		seq.selected.scaleX = sx;
-    		seq.selected.scaleY = sy;
-    	}
-    	seq.fireDataChanged();
-    }
-  }
-  
-  public void dataChanged(FrameSequence src) {
-    frlst.removeListSelectionListener(this);
-    //dispose.removeChangeListener(this);
-    dispose.removeItemListener(this);
-    showtime.removeChangeListener(this);
-    xoff.removeChangeListener(this);
-    yoff.removeChangeListener(this);
-    rotation.removeChangeListener(this);
-    scaleX.removeChangeListener(this);
-    scaleY.removeChangeListener(this);
-    
-    frlst.setListData(seq.frames);
-    frlst.setSelectedValue(src.selected,true);
-    if (src.selected!=null) {
-      dispose.setSelectedItem(dcodes[src.selected.dispose]);
-      showtime.setValue(new Integer(src.selected.showtime));
-      xoff.setValue(new Integer(src.selected.position.x));
-      yoff.setValue(new Integer(src.selected.position.y));
-      scaleX.setValue(new Double(src.selected.scaleX));
-      scaleY.setValue(new Double(src.selected.scaleY));
-      rotation.setValue(new Double(src.selected.rotationDegrees));
-    }
-    
-    frlst.addListSelectionListener(this);
-    //dispose.addChangeListener(this);
-    dispose.addItemListener(this);
-    showtime.addChangeListener(this);
-    xoff.addChangeListener(this);
-    yoff.addChangeListener(this);
-    rotation.addChangeListener(this);
-    scaleX.addChangeListener(this);
-    scaleY.addChangeListener(this);
-  }
-  
-  
+		JPanel content = new JPanel();
+		content.setLayout(new BoxLayout(content,
+		                                BoxLayout.Y_AXIS));
+		content.add(order);
+		content.add(settings);
+		return content;
+	}
 
-  public void valueChanged(ListSelectionEvent e) {
-    seq.selected=(SingleFrame)frlst.getSelectedValue();
-    seq.fireDataChanged();
-  }
+	public void actionPerformed(ActionEvent e) {
+		SingleFrame singleFrame = frameSequence.getSingleFrame();
+		if (singleFrame == null) {
+			return;
+		}
+		Object src = e.getSource();
 
-@Override
-public void itemStateChanged(ItemEvent e)
-{
-	Object src = e.getSource();
-	
-	if (src==dispose) {
-		
-    	int val=0;
-    	for (int i=0;i<dcodes.length;i++) {
-    		if (dcodes[i].equals(dispose.getSelectedItem())) val=i;
-    	}
-    	if (apply.isSelected()) {
-    		for (int i=0;i<seq.frames.length;i++) seq.frames[i].dispose=val;
-    	}
-    	else seq.selected.dispose=val;
+		if (src == dispose) {
+			singleFrame.setDispose(0);
+			for (int i = 0;
+			     i < dcodes.length;
+			     i++) {
+				String dcode = dcodes[i];
+				if (dcode.equals(dispose.getSelectedItem())) {
+					singleFrame.setDispose(i);
+				}
+			}
+			frameSequence.fireDataChanged();
+		}
 
-    	seq.fireDataChanged();
-    }
-}
-  
+		if (src == sooner) {
+			frameSequence.move(singleFrame,
+			                   true);
+		}
+		if (src == later) {
+			frameSequence.move(singleFrame,
+			                   false);
+		}
+		if (src == duplicate) {
+			frameSequence.add(new SingleFrame(singleFrame),
+			                  frameSequence.getSelectedIndex());
+		}
+		if (src == delete) {
+			int prevSeq = frameSequence.getSelectedIndex();
+			frameSequence.remove(singleFrame);
+			if (prevSeq
+			    <= singleFrameJList.getModel()
+			                       .getSize() - 1) {
+				singleFrameJList.setSelectedIndex(prevSeq);
+			} else {
+				singleFrameJList.setSelectedIndex(singleFrameJList.getModel()
+				                                                  .getSize() - 1);
+			}
+		}
+	}
+
+	public void stateChanged(ChangeEvent e) {
+		SingleFrame singleFrame = frameSequence.getSingleFrame();
+		if (singleFrame == null) {
+			return;
+		}
+
+		Object        src          = e.getSource();
+		SingleFrame[] singleFrames = frameSequence.getSingleFrames();
+		if (src == showtime) {
+			int val = (Integer) showtime.getValue();
+			if (apply.isSelected()) {
+				for (int i = 0;
+				     i < singleFrames.length;
+				     i++) {
+					singleFrames[i].setShowtime(val);
+				}
+			} else {
+				singleFrame.setShowtime((Integer) showtime.getValue());
+			}
+			frameSequence.fireDataChanged();
+		}
+
+		if (src == dispose) {
+			int val = 0;
+			for (int i = 0;
+			     i < dcodes.length;
+			     i++) {
+				String dcode = dcodes[i];
+				if (dcode.equals(dispose.getSelectedItem())) {
+					val = i;
+				}
+			}
+			if (apply.isSelected()) {
+				for (SingleFrame frame : singleFrames) {
+					frame.setDispose(val);
+				}
+			} else {
+				singleFrame.setDispose(val);
+			}
+			frameSequence.fireDataChanged();
+		}
+
+		if (src == xoff || src == yoff) {
+			int x = (Integer) Objects.requireNonNull(xoff)
+			                         .getValue();
+			int y = (Integer) Objects.requireNonNull(yoff)
+			                         .getValue();
+			Point val = new Point(x,
+			                      y);
+			if (apply.isSelected()) {
+				for (SingleFrame frame : singleFrames) {
+					frame.setPosition(val);
+				}
+			} else {
+				singleFrame.setPosition(val);
+			}
+			frameSequence.fireDataChanged();
+		}
+
+		if (src == rotation) {
+			double rot = (Double) Objects.requireNonNull(rotation)
+			                             .getModel()
+			                             .getValue();
+			if (apply.isSelected()) {
+				for (SingleFrame frame : singleFrames) {
+					frame.setRotationDegrees(rot);
+				}
+			} else {
+				singleFrame.setRotationDegrees(rot);
+			}
+
+			frameSequence.fireDataChanged();
+		}
+
+		if (src == scaleX || src == scaleY) {
+			float scaleX = ((Double) Objects.requireNonNull(this.scaleX)
+			                                .getValue()).floatValue();
+			float scaleY = ((Double) Objects.requireNonNull(this.scaleY)
+			                                .getValue()).floatValue();
+			if (apply.isSelected()) {
+				for (SingleFrame frame : singleFrames) {
+					frame.setScaleX(scaleX);
+					frame.setScaleY(scaleY);
+				}
+			} else {
+				singleFrame.setScaleX(scaleX);
+				singleFrame.setScaleY(scaleY);
+			}
+			frameSequence.fireDataChanged();
+		}
+	}
+
+	public void dataChanged(FrameSequence frameSequence) {
+		singleFrameJList.removeListSelectionListener(this);
+		//dispose.removeChangeListener(this);
+		dispose.removeItemListener(this);
+		showtime.removeChangeListener(this);
+		xoff.removeChangeListener(this);
+		yoff.removeChangeListener(this);
+		rotation.removeChangeListener(this);
+		scaleX.removeChangeListener(this);
+		scaleY.removeChangeListener(this);
+
+		singleFrameJList.setListData(this.frameSequence.getSingleFrames());
+		SingleFrame singleFrame = frameSequence.getSingleFrame();
+		singleFrameJList.setSelectedValue(singleFrame,
+		                                  true);
+		if (singleFrame != null) {
+			dispose.setSelectedItem(dcodes[singleFrame.getDispose()]);
+			showtime.setValue(singleFrame.getShowtime());
+			xoff.setValue(singleFrame.getPosition().x);
+			yoff.setValue(singleFrame.getPosition().y);
+			scaleX.setValue((double) singleFrame.getScaleX());
+			scaleY.setValue((double) singleFrame.getScaleY());
+			rotation.setValue(singleFrame.getRotationDegrees());
+		}
+
+		singleFrameJList.addListSelectionListener(this);
+		//dispose.addChangeListener(this);
+		dispose.addItemListener(this);
+		showtime.addChangeListener(this);
+		xoff.addChangeListener(this);
+		yoff.addChangeListener(this);
+		rotation.addChangeListener(this);
+		scaleX.addChangeListener(this);
+		scaleY.addChangeListener(this);
+	}
+
+	public void valueChanged(ListSelectionEvent e) {
+		frameSequence.setSingleFrame(singleFrameJList.getSelectedValue());
+		frameSequence.fireDataChanged();
+	}
+
+	@Override
+	public void itemStateChanged(ItemEvent e) {
+		Object src = e.getSource();
+		if (src == dispose) {
+			int val = 0;
+			for (int i = 0;
+			     i < dcodes.length;
+			     i++) {
+				String dcode = dcodes[i];
+				if (dcode.equals(dispose.getSelectedItem())) {
+					val = i;
+				}
+			}
+			if (apply.isSelected()) {
+				SingleFrame[] frameSequenceFrames = frameSequence.getSingleFrames();
+				for (SingleFrame frameSequenceFrame : frameSequenceFrames) {
+					frameSequenceFrame.setDispose(val);
+				}
+			} else {
+				frameSequence.getSingleFrame()
+				             .setDispose(val);
+			}
+			frameSequence.fireDataChanged();
+		}
+	}
 }

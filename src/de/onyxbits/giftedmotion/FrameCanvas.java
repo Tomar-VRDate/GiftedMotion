@@ -1,42 +1,46 @@
 package de.onyxbits.giftedmotion;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
-import java.awt.image.*;
+import java.awt.image.BufferedImage;
 
 /**
  * The canvas on which to draw SingleFrames
  */
-public class FrameCanvas extends JPanel implements FrameSequenceListener,
-MouseListener, MouseMotionListener {
+public class FrameCanvas
+				extends JPanel
+				implements FrameSequenceListener,
+				           MouseListener,
+				           MouseMotionListener {
 
 	/**
 	 * The sequence to draw
 	 */
-	private FrameSequence seq;
+	private final FrameSequence frameSequence;
 
 	/**
 	 * Onionskin boolean
 	 */
 	private boolean onionskinEnabled = false;
-	
+
 	/**
 	 * The tool used for transforming the selected image
 	 */
-	private TransformTool tool = new DragTool();
-	
+	private TransformTool transformTool = new DragTool();
+
 	/**
 	 * Thread for flickering
 	 */
 	private FlickerThread flickerThread = new FlickerThread();
-	
+
 	/**
 	 * Boolean to indicate which flickered image to show
 	 */
 	private boolean flickerShow = false;
 
-	public FrameCanvas(FrameSequence seq) {
-		this.seq = seq;
+	public FrameCanvas(FrameSequence frameSequence) {
+		this.frameSequence = frameSequence;
 		addMouseListener(this);
 		addMouseMotionListener(this);
 
@@ -44,126 +48,152 @@ MouseListener, MouseMotionListener {
 
 			@Override
 			public void keyPressed(KeyEvent ke) {
-				if (ke.getKeyCode() == KeyEvent.VK_SHIFT) 
-					tool.setShiftPressed(true);
+				if (ke.getKeyCode() == KeyEvent.VK_SHIFT) {
+					transformTool.setShiftPressed(true);
+				}
 			}
 
 			@Override
-			public void keyReleased(KeyEvent ke)
-			{
-				if (ke.getKeyCode() == KeyEvent.VK_SHIFT)
-					tool.setShiftPressed(false);
+			public void keyReleased(KeyEvent ke) {
+				if (ke.getKeyCode() == KeyEvent.VK_SHIFT) {
+					transformTool.setShiftPressed(false);
+				}
 			}
 		});
 	}
 
-	public void paintComponent(Graphics g) {
+	public void paintComponent(Graphics graphics) {
 		//long time = System.currentTimeMillis();
-	    super.paintComponent( g );
-	    Dimension size = getSize();
-	    
-	    if (seq.selected==null) {
-	      g.clearRect(0,0,size.width,size.height);
-	      return;
-	    }
-	    
-	    BufferedImage previous = new BufferedImage(size.width,size.height,BufferedImage.TYPE_INT_ARGB);
-	    
-	    for(int i=0;i<seq.frames.length;i++) {
-	      
-	      
-	      seq.frames[i].paint(g);
-	      // Only draw the sequence up to the selected frame
-	      // FIXME: This is utterly inefficient!
-	      if (seq.frames[i]==seq.selected) break;
-	      
-	      // If the selected frame is not reached yet, dispose
-	      switch(seq.frames[i].dispose) {
-	        case 0: {break;}
-	        case 1: {
-	          Graphics pre_gr = previous.getGraphics();
-	          seq.frames[i].paint(pre_gr);
-	          pre_gr.dispose();
-	          break;
-	        }
-	        case 2: {
-	          g.clearRect(0,0,size.width,size.height);
-	          break;
-	        }
-	        case 3: {
-	          g.clearRect(0,0,size.width,size.height);
-	          g.drawImage(previous,0,0,null);
-	          
-	          break;
-	        }
-	      }
-	    }
-	    //System.err.println("Time: "+(System.currentTimeMillis()-time));
+		super.paintComponent(graphics);
+		Dimension size = getSize();
+
+		if (frameSequence.getSingleFrame() == null) {
+			graphics.clearRect(0,
+			                   0,
+			                   size.width,
+			                   size.height);
+			return;
+		}
+
+		BufferedImage previous = new BufferedImage(size.width,
+		                                           size.height,
+		                                           BufferedImage.TYPE_INT_ARGB);
+
+		SingleFrame[] singleFrames = frameSequence.getSingleFrames();
+		for (SingleFrame singleFrame : singleFrames) {
+			singleFrame.paint(graphics);
+			// Only draw the sequence up to the selected frame
+			// FIXME: This is utterly inefficient!
+			if (singleFrame == frameSequence.getSingleFrame()) {
+				break;
+			}
+
+			// If the selected frame is not reached yet, dispose
+			switch (singleFrame.getDispose()) {
+				case 0: {
+					break;
+				}
+				case 1: {
+					Graphics previousGraphics = previous.getGraphics();
+					singleFrame.paint(previousGraphics);
+					previousGraphics.dispose();
+					break;
+				}
+				case 2: {
+					graphics.clearRect(0,
+					                   0,
+					                   size.width,
+					                   size.height);
+					break;
+				}
+				case 3: {
+					graphics.clearRect(0,
+					                   0,
+					                   size.width,
+					                   size.height);
+					graphics.drawImage(previous,
+					                   0,
+					                   0,
+					                   null);
+
+					break;
+				}
+			}
+		}
+		//System.err.println("Time: "+(System.currentTimeMillis()-time));
 	}
 
-	public Dimension getPreferredSize() { return seq.getExpansion(); }
+	public Dimension getPreferredSize() {
+		return frameSequence.getExpansion();
+	}
 
-	public void dataChanged(FrameSequence src) {
+	public void dataChanged(FrameSequence frameSequence) {
 		repaint();
 	}
 
-	public void setTool(TransformTool t)
-	{
-		tool = t;
-	}
-	
-	public void setOnionskin(boolean on)
-	{
+	public void setOnionskin(boolean on) {
 		onionskinEnabled = on;
 		repaint();
 	}
-	
-	public void setFlicker(boolean fli)
-	{
-		if (fli) 
-		{
+
+	public void setFlicker(boolean fli) {
+		if (fli) {
 			flickerThread = new FlickerThread();
 			flickerThread.start();
-		}
-		else 
-		{
+		} else {
 			flickerShow = false;
 			flickerThread = null;
 		}
 	}
 
-	public TransformTool getTool()
-	{
-		return tool;
+	public TransformTool getTransformTool() {
+		return transformTool;
+	}
+
+	public void setTransformTool(TransformTool transformTool) {
+		this.transformTool = transformTool;
 	}
 
 	public void mouseClicked(MouseEvent e) {}
 
 	public void mouseEntered(MouseEvent e) {}
 
-	public void mouseExited(MouseEvent e) {}
+	public void mouseExited(MouseEvent e)  {}
 
 	public void mousePressed(MouseEvent e) {
-		if (seq.selected==null) return;
-		Point pos = e.getPoint();
-		tool.setOffset(new Point(pos.x-seq.selected.position.x,pos.y-seq.selected.position.y));
-		tool.beginTransform(seq.selected, e.getPoint());
+		SingleFrame singleFrame = frameSequence.getSingleFrame();
+		if (singleFrame == null) {
+			return;
+		}
+		Point mousePos = e.getPoint();
+		transformTool.setOffset(new Point(mousePos.x - singleFrame.getPosition().x,
+		                                  mousePos.y - singleFrame.getPosition().y));
+		transformTool.beginTransform(singleFrame,
+		                             mousePos);
 	}
 
 	public void mouseReleased(MouseEvent e) {
-		if (seq.selected==null) return;
-		seq.fireDataChanged();
-		tool.endTransform(seq.selected, e.getPoint());
+		SingleFrame singleFrame = frameSequence.getSingleFrame();
+		if (singleFrame == null) {
+			return;
+		}
+		frameSequence.fireDataChanged();
+		Point mousePos = e.getPoint();
+		transformTool.endTransform(singleFrame,
+		                           mousePos);
 	}
 
 	public void mouseDragged(MouseEvent e) {
-		if (seq.selected==null) return;
-		tool.transform(seq.selected, e.getPoint());
+		SingleFrame singleFrame = frameSequence.getSingleFrame();
+		if (singleFrame == null) {
+			return;
+		}
+		Point mousePos = e.getPoint();
+		transformTool.transform(singleFrame,
+		                        mousePos);
 		repaint();
 	}
 
-
-	public void mouseMoved(MouseEvent e) {}
-
-
+	public void mouseMoved(MouseEvent e) {
+	}
 }

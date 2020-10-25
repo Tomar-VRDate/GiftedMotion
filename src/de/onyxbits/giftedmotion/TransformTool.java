@@ -1,24 +1,27 @@
 package de.onyxbits.giftedmotion;
 
-import java.awt.Point;
+import java.awt.*;
 
-public abstract class TransformTool
-{
-	protected Point offset;
+public abstract class TransformTool {
+	protected Point   offset;
 	protected boolean shiftPressed;
-	
-	public void setOffset(Point mousePos)
-	{
+
+	public void setOffset(Point mousePos) {
 		this.offset = mousePos;
 	}
-	
-	public void setShiftPressed(boolean shi)
-	{
+
+	public void setShiftPressed(boolean shi) {
 		shiftPressed = shi;
 	}
-	
-	public abstract void beginTransform(SingleFrame img, Point mousePos);
-	public abstract void transform(SingleFrame img, Point mousePos);
-	public abstract void endTransform(SingleFrame img, Point mousePos);
+
+	public abstract void beginTransform(SingleFrame img,
+	                                    Point mousePos);
+
+	public abstract void transform(SingleFrame img,
+	                               Point mousePos);
+
+	public abstract void endTransform(SingleFrame img,
+	                                  Point mousePos);
+
 	public abstract String getStatus(SingleFrame img);
 }

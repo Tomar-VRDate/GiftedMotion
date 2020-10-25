@@ -1,31 +1,32 @@
 package de.onyxbits.giftedmotion;
 
-import java.awt.Point;
+import java.awt.*;
 
-public class DragTool extends TransformTool
-{
-	
+public class DragTool
+				extends TransformTool {
+
 	@Override
-	public void transform(SingleFrame img, Point mousePos)
-	{
-		img.position.x=mousePos.x-offset.x;
-	    img.position.y=mousePos.y-offset.y;
+	public void transform(SingleFrame img,
+	                      Point mousePos) {
+		img.getPosition().x = mousePos.x - offset.x;
+		img.getPosition().y = mousePos.y - offset.y;
 	}
 
 	@Override
-	public void beginTransform(SingleFrame img, Point mousePos)
-	{
+	public void beginTransform(SingleFrame img,
+	                           Point mousePos) {
 	}
 
 	@Override
-	public void endTransform(SingleFrame img, Point mousePos)
-	{
+	public void endTransform(SingleFrame img,
+	                         Point mousePos) {
 	}
-	
+
 	@Override
-	public String getStatus(SingleFrame img)
-	{
-		Integer[] status = {img.position.x, img.position.y};
-		return Dict.get("core.imagedragged", status);
+	public String getStatus(SingleFrame img) {
+		Integer[] status = {img.getPosition().x,
+		                    img.getPosition().y};
+		return Translations.get("core.imagedragged",
+		                        status);
 	}
 }

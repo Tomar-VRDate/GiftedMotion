@@ -1,58 +1,91 @@
 package de.onyxbits.giftedmotion;
-import java.awt.*;
-import java.awt.image.*;
+
+import javax.imageio.ImageIO;
 import javax.swing.*;
-import java.io.*;
-import javax.imageio.*;
+import java.awt.*;
+import java.awt.image.BufferedImage;
+import java.io.File;
 
 /**
  * Preview an image file
  */
-public class Preview extends JPanel {
+public class Preview
+				extends JPanel {
 
-  /**
-   * Preferredsize of the previewcanvas
-   */
-  private Dimension preferred = new Dimension(1,1);
-  
-  /**
-   * Image to show
-   */
-  private BufferedImage img;
-  
+	/**
+	 * Preferred size of the preview canvas
+	 */
+	private Dimension preferred = new Dimension(1,
+	                                            1);
 
-  public Preview () {}
-  
-  /**
-   * Display an image
-   * @param file the file to display. If it cannot be loaded, nothing will be
-   * displayed.
-   */
-  public void show(File f) {
-    try {
-      img = ImageIO.read(f);
-      preferred = new Dimension(img.getWidth(),img.getHeight());
-    }
-    catch (Exception e) {
-      //e.printStackTrace(); // Debug only
-      img=null;
-    }
-    //repaint();
-    revalidate();
-    repaint();
-  }
-  
-  // Overridden
-  public Dimension getPreferredSize() {
-    return preferred;
-  }
-  
-  // Overriden
-  public void paint(Graphics gr) {
-    Dimension size = getSize();
-    gr.clearRect(0,0,size.width,size.height);
-    if (img!=null) {
-      gr.drawImage(img,0,0,null);
-    }
-  }
+	/**
+	 * Image to show
+	 */
+	private BufferedImage img;
+
+
+	public Preview() {
+	}
+
+	/**
+	 * Display an image
+	 *
+	 * @param f the file to display. If it cannot be loaded, nothing will be
+	 *          displayed.
+	 */
+	public void show(File f) {
+		try {
+			setImg(ImageIO.read(f));
+			setPreferred(new Dimension(getImg().getWidth(),
+			                           getImg().getHeight()));
+		} catch (Exception e) {
+			//e.printStackTrace(); // Debug only
+			setImg(null);
+		}
+		//repaint();
+		revalidate();
+		repaint();
+	}
+
+	// Overridden
+	public Dimension getPreferredSize() {
+		return getPreferred();
+	}
+
+	// Overriden
+	public void paint(Graphics gr) {
+		Dimension size = getSize();
+		gr.clearRect(0,
+		             0,
+		             size.width,
+		             size.height);
+		if (getImg() != null) {
+			gr.drawImage(getImg(),
+			             0,
+			             0,
+			             null);
+		}
+	}
+
+	/**
+	 * Preferredsize of the previewcanvas
+	 */
+	public Dimension getPreferred() {
+		return preferred;
+	}
+
+	public void setPreferred(Dimension preferred) {
+		this.preferred = preferred;
+	}
+
+	/**
+	 * Image to show
+	 */
+	public BufferedImage getImg() {
+		return img;
+	}
+
+	public void setImg(BufferedImage img) {
+		this.img = img;
+	}
 }

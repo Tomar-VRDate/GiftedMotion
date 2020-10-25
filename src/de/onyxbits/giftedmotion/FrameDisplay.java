@@ -1,33 +1,39 @@
 package de.onyxbits.giftedmotion;
-import javax.swing.*;
 
-import java.awt.event.MouseEvent;
-import java.awt.event.MouseListener;
+import javax.swing.*;
 
 /**
  * Wrapper around the actual canvas class, to glue it into the workspace
  */
-public class FrameDisplay extends JInternalFrame {
+public class FrameDisplay
+				extends JInternalFrame {
+	/**
+	 * The frame canvas to draw upon
+	 */
+	private FrameCanvas frameCanvas;
 
-  /**
-   * The canvas to draw upon
-   */
-  private FrameCanvas canvas;
-  
-  public FrameDisplay(FrameCanvas canvas) {
-    super("Preview",true,false,false,false);
-    setFrameIcon(null);
-    this.canvas=canvas;
-    setContentPane(canvas);
-    pack();
-  }
-  
-  /**
-   * Query the canvas
-   * @return the canvas displayed
-   */
-  public FrameCanvas getCanvas() {
-    return canvas;
-  }
+	public FrameDisplay(FrameCanvas frameCanvas) {
+		super("Preview",
+		      true,
+		      false,
+		      false,
+		      false);
+		setFrameIcon(null);
+		this.setFrameCanvas(frameCanvas);
+		setContentPane(frameCanvas);
+		pack();
+	}
 
+	/**
+	 * Query the canvas
+	 *
+	 * @return the canvas displayed
+	 */
+	public FrameCanvas getFrameCanvas() {
+		return frameCanvas;
+	}
+
+	public void setFrameCanvas(FrameCanvas frameCanvas) {
+		this.frameCanvas = frameCanvas;
+	}
 }

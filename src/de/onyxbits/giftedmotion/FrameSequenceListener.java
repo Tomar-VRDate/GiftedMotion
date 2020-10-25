@@ -6,9 +6,10 @@ package de.onyxbits.giftedmotion;
  */
 public interface FrameSequenceListener {
 
-  /**
-   * Called, when the data of a FrameSequence changes
-   * @param src the source FrameSequence
-   */
-  public void dataChanged(FrameSequence src);
+	/**
+	 * Called, when the data of a FrameSequence changes
+	 *
+	 * @param frameSequence the source FrameSequence
+	 */
+	void dataChanged(FrameSequence frameSequence);
 }
