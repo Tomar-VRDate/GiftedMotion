@@ -16,7 +16,7 @@ import java.util.List;
 /**
  * Core class
  */
-public class Core
+public class Main
 				extends JFrame
 				implements WindowListener,
 				           ActionListener,
@@ -24,13 +24,13 @@ public class Core
 				           MouseMotionListener,
 				           MouseListener,
 				           DropTargetListener {
-	public static final  String GIFTED_MOTION_VERSION = "Gifted Motion 2020-24-10";
+	public static final  String GIFTED_MOTION_VERSION = "Gifted Motion 2020-10-26";
 	private static final String VERSION               = setVersion();
 
 	/**
 	 * Back reference to the running program
 	 */
-	public static Core app;
+	public static Main app;
 
 	/**
 	 * Quit program
@@ -80,19 +80,19 @@ public class Core
 	/**
 	 * Record (same as export)
 	 */
-	private final JButton        record         = new JButton(IO.createIcon("Tango/22x22/actions" + "/document-save.png",
-	                                                                        Translations.get("core.record")));
+	private final JButton             record      = new JButton(IO.createIcon("Tango/22x22/actions/document-save.png",
+	                                                                          Translations.get("core.record")));
 	/**
 	 * Import (same as load)
 	 */
-	private final JButton        open           = new JButton(IO.createIcon("Tango/22x22/actions" + "/document-open.png",
-	                                                                        Translations.get("core.open")));
+	private final JButton             open        = new JButton(IO.createIcon("Tango/22x22/actions/document-open.png",
+	                                                                          Translations.get("core.open")));
 	/**
 	 * Close project button
 	 */
-	private final JButton        closeButton    = new JButton(//
-	                                                          IO.createIcon("Tango/22x22/actions/system-log-out.png",
-	                                                                        Translations.get("core.close")));
+	private final JButton             closeButton = new JButton(//
+	                                                            IO.createIcon("Tango/22x22/actions/system-log-out.png",
+	                                                                          Translations.get("core.close")));
 	/**
 	 * Toggle displaying of the settings window
 	 */
@@ -139,31 +139,30 @@ public class Core
 	/**
 	 * Sequence Editor
 	 */
-	private       SequenceEditor sequenceEditor;
+	private       SequenceEditor      sequenceEditor;
 	/**
 	 * Frame Display
 	 */
-	private       FrameDisplay   frameDisplay;
+	private       FrameDisplay        frameDisplay;
 	/**
 	 * The framesequence being worked upon
 	 */
-	private       FrameSequence  frameSequence;
-
-	/**
-	 * Directory, to open filedialogs with
-	 */
-	private File directory = new File(System.getProperty("user.dir"));
-
+	private       FrameSequence       frameSequence;
 	/**
 	 * Used for doing an animation preview
 	 */
-	private FrameSequencePlayer frameSequencePlayer;
+	private final FrameSequencePlayer frameSequencePlayer;
+	/**
+	 * Directory, to open filedialogs with
+	 */
+	private       File                directory   = new File(new File(System.getProperty("user.dir")).getParent(),
+	                                                         "Pictures");
 
 	/**
 	 * Construct a new instance of the program. There may only be one object
 	 * of this class present.
 	 */
-	public Core() {
+	public Main() {
 		//Mac OS compatibility things (fullscreen mode, icon setting)
 		if (MacOSCompat.isMacOSX()) {
 			MacOSCompat.enableFullScreenMode(this);
@@ -287,8 +286,9 @@ public class Core
 		postStatus("");
 	}
 
+	@SuppressWarnings("RedundantExplicitVariableType")
 	private static String setVersion() {
-		Package aPackage              = Core.class.getPackage();
+		Package aPackage              = Main.class.getPackage();
 		String  implementationVersion = aPackage.getImplementationVersion();
 		String version = implementationVersion != null
 		                 ? String.format("%s %s",
@@ -325,12 +325,11 @@ public class Core
 		} catch (ClassNotFoundException | InstantiationException
 				| IllegalAccessException | UnsupportedLookAndFeelException e)
 		{
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}*/
 
 		new Translations();
-		app = new Core();
+		app = new Main();
 		app.setSize(new Dimension(800,
 		                          600));
 		app.setTitle(VERSION);
@@ -472,10 +471,10 @@ public class Core
 
 	public void componentResized(ComponentEvent e) {
 		Component c = (Component) e.getSource();
-		Integer[] size = {new Integer(c.getWidth()),
-		                  new Integer(c.getHeight())};
+		Integer[] size = {c.getWidth(),
+		                  c.getHeight()};
 		postStatus(Translations.get("core.componentresized",
-		                            size));
+		                            (Object[]) size));
 	}
 
 	public void mouseMoved(MouseEvent e) {}
@@ -512,7 +511,6 @@ public class Core
 	/**
 	 * * Handlers for events created by GUI elements
 	 **/
-
 	public void handleQuit() {
 		System.exit(0);
 	}
@@ -542,16 +540,14 @@ public class Core
 			}
 
 			SingleFrame[] frames = IO.load(selected);
-			if (frames == null || frames.length == 0) {
+			if (frames.length == 0) {
 				postStatus(Translations.get("core.handleload.nothing"));
 				return;
 			}
 
 			if (frameSequence != null) {
-				for (int i = 0;
-				     i < frames.length;
-				     i++) {
-					frameSequence.add(frames[i],
+				for (SingleFrame frame : frames) {
+					frameSequence.add(frame,
 					                  frameSequence.getSingleFrames().length);
 				}
 			} else {
@@ -782,26 +778,18 @@ public class Core
 
 	@Override
 	public void dragEnter(DropTargetDragEvent dtde) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void dragOver(DropTargetDragEvent dtde) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void dropActionChanged(DropTargetDragEvent dtde) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
 	public void dragExit(DropTargetEvent dte) {
-		// TODO Auto-generated method stub
-
 	}
 
 	@Override
@@ -816,19 +804,18 @@ public class Core
 
 			for (DataFlavor flavor : flavors) {
 				if (flavor.isFlavorJavaFileListType()) {
-					@SuppressWarnings("unchecked") List<File> files = (List<File>) transferable.getTransferData(flavor);
+					List<File> files = (List<File>) transferable.getTransferData(flavor);
 
-					SingleFrame[] singleFrames = IO.load(files.toArray(new File[files.size()]));
+					@SuppressWarnings("ToArrayCallWithZeroLengthArrayArgument") SingleFrame[] singleFrames
+									= IO.load(files.toArray(new File[files.size()]));
 					if (singleFrames.length == 0) {
 						postStatus(Translations.get("core.handleload.nothing"));
 						return;
 					}
 
 					if (frameSequence != null) {
-						for (int i = 0;
-						     i < singleFrames.length;
-						     i++) {
-							frameSequence.add(singleFrames[i],
+						for (SingleFrame singleFrame : singleFrames) {
+							frameSequence.add(singleFrame,
 							                  frameSequence.getSingleFrames().length);
 						}
 					} else {

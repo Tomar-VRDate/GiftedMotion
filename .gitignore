@@ -1,5 +1,2 @@
-*.class
-*~
-DEADJOE
-*.jar
-/bin/
+/target/
+.flattened-pom.xml

@@ -1,7 +1,9 @@
 package biz.tomar.storage.gif;
 
 import java.awt.*;
+import java.util.Collections;
 import java.util.Vector;
+import java.util.stream.IntStream;
 
 
 /**
@@ -46,17 +48,19 @@ public class FrameSequence {
 		if (index >= 0 && index <= singleFrames.length) {
 			SingleFrame[] bigger = new SingleFrame[singleFrames.length + 1];
 			// Copy the first few old ones over
-			for (int i = 0;
-			     i < index;
-			     i++) {
-				bigger[i] = singleFrames[i];
-			}
+			System.arraycopy(singleFrames,
+			                 0,
+			                 bigger,
+			                 0,
+			                 index);
 			bigger[index] = frame; // Add the new frame
 			// Copy the rest of the old ones over
-			for (int i = index + 1;
-			     i < bigger.length;
-			     ++i) {
-				bigger[i] = singleFrames[i - 1];
+			if (bigger.length - index + 1 >= 0) {
+				System.arraycopy(singleFrames,
+				                 index + 1 - 1,
+				                 bigger,
+				                 index + 1,
+				                 bigger.length - index + 1);
 			}
 			setSingleFrames(bigger);
 			fireDataChanged();
@@ -96,19 +100,12 @@ public class FrameSequence {
 			return;
 		}
 		Vector<SingleFrame> tmp = new Vector<>();
-		for (int i = 0;
-		     i < singleFrames.length;
-		     i++) {
-			tmp.add(singleFrames[i]);
-		}
+		Collections.addAll(tmp,
+		                   singleFrames);
 		tmp.remove(frame);
 		setSingleFrames(new SingleFrame[tmp.size()]);
 		tmp.copyInto(singleFrames);
-		if (singleFrames.length > 0) {
-			setSingleFrame(singleFrames[0]);
-		} else {
-			setSingleFrame(null);
-		}
+		setSingleFrame(singleFrames[0]);
 		fireDataChanged();
 	}
 
@@ -123,10 +120,8 @@ public class FrameSequence {
 		Dimension ret = new Dimension(1,
 		                              1);
 		SingleFrame[] singleFrames = getSingleFrames();
-		for (int i = 0;
-		     i < singleFrames.length;
-		     ++i) {
-			Dimension d = singleFrames[i].getSize();
+		for (SingleFrame frame : singleFrames) {
+			Dimension d = frame.getSize();
 			if (d.width > ret.width) {
 				ret.width = d.width;
 			}
@@ -155,12 +150,11 @@ public class FrameSequence {
 			if (sooner) {
 				tmp = singleFrames[idx - 1];
 				singleFrames[idx - 1] = singleFrames[idx];
-				singleFrames[idx] = tmp;
 			} else {
 				tmp = singleFrames[idx + 1];
 				singleFrames[idx + 1] = singleFrames[idx];
-				singleFrames[idx] = tmp;
 			}
+			singleFrames[idx] = tmp;
 			fireDataChanged();
 		} catch (Exception e) {
 			// Lazy way
@@ -173,31 +167,30 @@ public class FrameSequence {
 	 * @param fsl Object ot be notifed of datachange events
 	 */
 	public void addFrameSequenceListener(FrameSequenceListener fsl) {
-		Vector frameSequenceListeners = getFrameSequenceListeners();
+		Vector<FrameSequenceListener> frameSequenceListeners = getFrameSequenceListeners();
 		frameSequenceListeners.add(fsl);
 	}
 
 	/**
 	 * Deregister listener
 	 *
-	 * @param fsl listener to remove
+	 * @param frameSequenceListener listener to remove
 	 */
-	public void removeFrameSequenceListener(FrameSequenceListener fsl) {
-		Vector frameSequenceListeners = getFrameSequenceListeners();
-		frameSequenceListeners.remove(fsl);
+	public void removeFrameSequenceListener(FrameSequenceListener frameSequenceListener) {
+		Vector<FrameSequenceListener> frameSequenceListeners = getFrameSequenceListeners();
+		frameSequenceListeners.remove(frameSequenceListener);
 	}
 
 	/**
-	 * Notify Framesequencelisteners, that the data changed
+	 * Notify frameSequenceListeners, that the data changed
 	 */
 	protected void fireDataChanged() {
-		Vector frameSequenceListeners = getFrameSequenceListeners();
-		int    size                   = frameSequenceListeners.size();
-		for (int i = 0;
-		     i < size;
-		     i++) {
-			((FrameSequenceListener) frameSequenceListeners.get(i)).dataChanged(this);
-		}
+		Vector<FrameSequenceListener> frameSequenceListeners = getFrameSequenceListeners();
+		int                           size                   = frameSequenceListeners.size();
+		IntStream.range(0,
+		                size)
+		         .forEach(i -> frameSequenceListeners.get(i)
+		                                             .dataChanged(this));
 	}
 
 	/**
@@ -226,11 +219,11 @@ public class FrameSequence {
 	/**
 	 * Eventlisteners
 	 */
-	public Vector getFrameSequenceListeners() {
+	public Vector<FrameSequenceListener> getFrameSequenceListeners() {
 		return frameSequenceListeners;
 	}
 
-	public void setFrameSequenceListeners(Vector frameSequenceListeners) {
+	public void setFrameSequenceListeners(Vector<FrameSequenceListener> frameSequenceListeners) {
 		this.frameSequenceListeners = frameSequenceListeners;
 	}
 }

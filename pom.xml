@@ -4,7 +4,7 @@
 	<artifactId>storage.gif</artifactId>
 	<packaging>jar</packaging>
 	<name>Gifted Motion GIF Editor</name>
-	<version>2020.10.24</version>
+	<version>2020.10.26</version>
 	<description>GIF Editor</description>
 	<url>http://www.onyxbits.de/giftedmotion</url>
 	<licenses>
@@ -48,7 +48,7 @@
 		<url>https://github.com/VRDate/GiftedMotion.git</url>
 	</scm>
 	<properties>
-		<java.version>14</java.version>
+		<java.version>15</java.version>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 		<groupId>${project.groupId}</groupId>
 		<artifactId>${project.artifactId}</artifactId>
@@ -82,59 +82,59 @@
 		<!--		<maven-resources-plugin.version>3.2.0</maven-resources-plugin.version>-->
 	</properties>
 	<dependencies>
-		<dependency>
-			<groupId>com.googlecode.json-simple</groupId>
-			<artifactId>json-simple</artifactId>
-			<version>${json-simple.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>${jackson-databind.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.apache.commons</groupId>
-			<artifactId>commons-compress</artifactId>
-			<version>${commons-compress.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.tukaani</groupId>
-			<artifactId>xz</artifactId>
-			<version>${xz.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-net</groupId>
-			<artifactId>commons-net</artifactId>
-			<version>${commons-net.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>javax.validation</groupId>
-			<artifactId>validation-api</artifactId>
-			<version>${validation-api.version}</version>
-			<scope>compile</scope>
-		</dependency>
-		<dependency>
-			<groupId>junit</groupId>
-			<artifactId>junit</artifactId>
-			<version>${junit.version}</version>
-			<scope>test</scope>
-		</dependency>
-		<dependency>
-			<groupId>commons-lang</groupId>
-			<artifactId>commons-lang</artifactId>
-			<version>${commons-lang.version}</version>
-			<scope>test</scope>
-		</dependency>
+		<!--		<dependency>-->
+		<!--			<groupId>com.googlecode.json-simple</groupId>-->
+		<!--			<artifactId>json-simple</artifactId>-->
+		<!--			<version>${json-simple.version}</version>-->
+		<!--			<scope>compile</scope>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>com.fasterxml.jackson.core</groupId>-->
+		<!--			<artifactId>jackson-databind</artifactId>-->
+		<!--			<version>${jackson-databind.version}</version>-->
+		<!--			<scope>compile</scope>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>org.apache.commons</groupId>-->
+		<!--			<artifactId>commons-compress</artifactId>-->
+		<!--			<version>${commons-compress.version}</version>-->
+		<!--			<scope>compile</scope>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>org.tukaani</groupId>-->
+		<!--			<artifactId>xz</artifactId>-->
+		<!--			<version>${xz.version}</version>-->
+		<!--			<scope>compile</scope>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>commons-net</groupId>-->
+		<!--			<artifactId>commons-net</artifactId>-->
+		<!--			<version>${commons-net.version}</version>-->
+		<!--			<scope>compile</scope>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>javax.validation</groupId>-->
+		<!--			<artifactId>validation-api</artifactId>-->
+		<!--			<version>${validation-api.version}</version>-->
+		<!--			<scope>compile</scope>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>junit</groupId>-->
+		<!--			<artifactId>junit</artifactId>-->
+		<!--			<version>${junit.version}</version>-->
+		<!--			<scope>test</scope>-->
+		<!--		</dependency>-->
+		<!--		<dependency>-->
+		<!--			<groupId>commons-lang</groupId>-->
+		<!--			<artifactId>commons-lang</artifactId>-->
+		<!--			<version>${commons-lang.version}</version>-->
+		<!--			<scope>test</scope>-->
+		<!--		</dependency>-->
 	</dependencies>
 	<build>
 		<resources>
 			<resource>
-				<directory>/src/main/resources/scripts</directory>
+				<directory>src/main/resources</directory>
 			</resource>
 		</resources>
 		<plugins>
