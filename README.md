@@ -1,4 +1,4 @@
-GiftedMotion 1.5
+GiftedMotion 2024-05-20
 ============
 ![Giftedmotion](http://i.imgur.com/obuzBzt.png "Next generation")
 
@@ -7,11 +7,11 @@ Introduction
 
 This simply is a "better version" of the old GiftedMotion animator program, created by OnyxBits. 
 
-Eventually this'll develop into more of a "Version 2.0" of GiftedMotion, through slow additions. I think the ultimate goal is to create an applet version and perhaps specialize the software to gif editing and compositing, rather than the original purpose of simply compiling gifs from files.
+Eventually, through slow additions, that'll develop into more of a "Version 2.0" of GiftedMotion. I think the ultimate goal is to create an applet version and perhaps specialize the software in gif editing and compositing rather than the original purpose of simply compiling gifs from files.
 
 To Do
 =====
-* Get a new name
+* WebP support
 * UNDO!!!!
 * Add JMF or something so it can decode videos to gif
 * Add a youtube downloader, in conjunction with the aforementioned decoder
@@ -23,14 +23,14 @@ To Do
 * Create an in-browser applet (or webstart)
 * Probably overkill but allow publication directly to reddit or imgur
 
-Differences from Vanilla Version
+Differences from the Vanilla Version
 =================
 
 * Windows can't float away, forever unusable
-* Buttons are more accurately disabled/enabled based on state
-* Resources file edited to be more logical. I think OnyxBits is German.
-* Removed crufy languages that really aren't necessary.
-* Fixed annoying bug in the sequence editor
+* Buttons are more accurately disabled/enabled based on the state
+* Resources file edited to be more logical.
+* Removed crucify languages that really aren't necessary.
+* Fixed an annoying bug in the sequence editor
 * Added drag-n-drop from the filesystem
 * Added a tool system
 * Rotate tool
