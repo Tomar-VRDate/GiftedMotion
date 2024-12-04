@@ -15,12 +15,12 @@ To Do
 * UNDO!!!!
 * Add JMF or something so it can decode videos to gif
 * Add a youtube downloader, in conjunction with the aforementioned decoder
-* Maybe add an image editor (ganked from someone else's project), though that could be outsourced to the OS default.
+* Maybe add an image editor (from someone else's project), though that could be outsourced to the OS default.
 * 3D? Ehhh.. nah.
 * Load multiple projects in one workspace and allow copying of frames
-* Get a faster gif encoder, holy crap.
+* Get a faster gif encoder.
 * Get a less buggy gif decoder, amazingly Java's pack-in one is rubbish.
-* Create an in-browser applet (or webstart)
+* Create an in-browser wasm (or webstart)
 * Probably overkill but allow publication directly to reddit or imgur
 
 Differences from the Vanilla Version
